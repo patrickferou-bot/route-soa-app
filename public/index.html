@@ -1,0 +1,1476 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Route SOA">
+<title>Route SOA</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
+:root{
+  --bg:#F0F4F8;--card:#FFFFFF;--border:#E2E8F0;
+  --accent:#FF6B00;--green:#16A34A;--red:#DC2626;--blue:#2563EB;--yellow:#D97706;
+  --text:#1A202C;--muted:#64748B;--white:#FFFFFF;--dark:#0F172A;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;padding-bottom:90px;}
+
+/* HEADER */
+header{background:var(--dark);padding:14px 16px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:10;box-shadow:0 2px 12px rgba(0,0,0,0.3);}
+.logo{width:40px;height:40px;background:var(--accent);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.header-title{font-size:17px;font-weight:900;color:var(--white);}
+.header-sub{font-size:11px;color:#94A3B8;margin-top:1px;font-weight:600;}
+.header-right{margin-left:auto;display:flex;gap:8px;align-items:center;}
+.sos-btn-head{background:#DC2626;border:none;color:#fff;border-radius:10px;padding:8px 12px;font-size:14px;font-weight:900;cursor:pointer;font-family:inherit;}
+.settings-btn{background:rgba(255,255,255,0.12);border:none;color:var(--white);border-radius:10px;padding:8px 12px;font-size:16px;cursor:pointer;}
+
+/* BOTTOM NAV */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--dark);display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom);}
+.nav-btn{flex:1;padding:10px 4px 14px;display:flex;flex-direction:column;align-items:center;gap:3px;background:transparent;border:none;color:#64748B;font-size:10px;font-weight:700;cursor:pointer;font-family:inherit;text-transform:uppercase;letter-spacing:0.04em;}
+.nav-btn.active{color:var(--accent);}
+.nav-icon{font-size:22px;}
+
+/* PAGES */
+.page{display:none;padding:14px 14px;max-width:500px;margin:0 auto;}
+.page.active{display:block;}
+
+/* SECTION LABEL */
+.section-label{font-size:12px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin:18px 0 8px;display:block;}
+
+/* CARDS */
+.card{background:var(--card);border-radius:16px;margin-bottom:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.07);}
+.card.done{background:#F0FDF4;border:2px solid var(--green);}
+
+/* DRIVER CHIPS — gros, lisibles pour tous les âges */
+.chip-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+.chip{display:flex;align-items:center;gap:10px;padding:16px 14px;border-radius:14px;border:3px solid var(--border);background:var(--card);color:var(--text);font-size:17px;font-weight:800;cursor:pointer;user-select:none;box-shadow:0 2px 6px rgba(0,0,0,0.06);transition:border-color 0.15s,background 0.15s;}
+.chip.active{border-color:var(--c,var(--accent));background:var(--c,var(--accent));color:#fff;}
+.cdot{width:12px;height:12px;border-radius:50%;background:var(--c,var(--accent));flex-shrink:0;}
+.chip.active .cdot{background:rgba(255,255,255,0.5);}
+
+/* DRIVER SELECTED CARD */
+.driver-sel-card{background:var(--card);border-radius:16px;padding:16px 18px;margin-bottom:14px;display:flex;align-items:center;gap:14px;box-shadow:0 2px 8px rgba(0,0,0,0.08);border-left:6px solid var(--accent);}
+.driver-sel-avatar{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900;color:#fff;flex-shrink:0;}
+.driver-sel-name{font-size:20px;font-weight:900;color:var(--text);}
+.driver-sel-sub{font-size:13px;color:var(--muted);font-weight:600;margin-top:2px;}
+.change-btn{margin-left:auto;background:var(--bg);border:2px solid var(--border);border-radius:10px;padding:8px 12px;font-size:13px;font-weight:700;color:var(--muted);cursor:pointer;font-family:inherit;flex-shrink:0;}
+
+/* BUTTONS */
+#file-input{display:none;}
+.btn-big{width:100%;padding:20px;border:none;border-radius:16px;font-size:19px;font-weight:900;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 4px 14px rgba(0,0,0,0.12);transition:transform 0.1s;}
+.btn-big:active{transform:scale(0.97);}
+.btn-orange{background:var(--accent);color:#fff;}
+.btn-green{background:var(--green);color:#fff;}
+.btn-red{background:var(--red);color:#fff;}
+.btn-blue{background:var(--blue);color:#fff;}
+.btn-sm{background:var(--bg);border:2px solid var(--border);color:var(--muted);border-radius:10px;padding:10px 16px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;}
+
+/* INPUTS */
+.inp{width:100%;background:var(--bg);border:2px solid var(--border);border-radius:12px;padding:14px 16px;color:var(--text);font-size:16px;font-weight:600;outline:none;font-family:inherit;margin-bottom:10px;}
+.inp:focus{border-color:var(--blue);}
+.inp::placeholder{color:var(--muted);font-weight:400;}
+
+/* SPINNER */
+.spinner{width:36px;height:36px;border:4px solid rgba(255,107,0,0.2);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* SUMMARY GRID */
+.summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.summary-card{background:var(--card);border-radius:14px;padding:14px;text-align:center;box-shadow:0 2px 6px rgba(0,0,0,0.06);}
+.summary-val{font-size:26px;font-weight:900;color:var(--accent);}
+.summary-label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-top:3px;}
+
+/* PROGRESS BAR */
+.progress-wrap{background:#E2E8F0;border-radius:20px;height:14px;overflow:hidden;margin:8px 0;}
+.progress-fill{height:100%;border-radius:20px;background:linear-gradient(90deg,var(--blue),var(--green));transition:width 0.8s;}
+
+/* TOURNEE CARD */
+.tournee-header{padding:14px 16px;display:flex;align-items:center;gap:10px;}
+.tournee-num{font-size:17px;font-weight:900;color:#fff;}
+.tournee-km{font-size:13px;font-weight:700;color:rgba(255,255,255,0.8);background:rgba(0,0,0,0.2);padding:4px 10px;border-radius:20px;}
+.tournee-time{font-size:12px;color:rgba(255,255,255,0.75);font-weight:600;margin-top:2px;}
+.tournee-start-btn{width:100%;padding:16px;border:none;background:#FFF7ED;color:var(--accent);font-size:17px;font-weight:900;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;border-bottom:2px solid var(--border);}
+.tournee-started{padding:10px 16px;background:#F0FDF4;color:var(--green);font-size:13px;font-weight:800;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;}
+
+/* DEPOT INTERMEDIAIRE */
+.depot-inter{padding:10px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;background:#FFF7ED;}
+.depot-inter-label{font-size:12px;color:var(--muted);font-weight:600;}
+.depot-inter-name{font-size:15px;font-weight:800;color:var(--accent);}
+
+/* LIVRAISON ROW */
+.liv-row{padding:14px 16px;border-bottom:1px solid var(--border);}
+.liv-row:last-child{border-bottom:none;}
+.liv-row.done{background:#F0FDF4;}
+.liv-num{width:36px;height:36px;border-radius:50%;color:#fff;font-size:16px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.liv-type-reprise{display:inline-block;font-size:11px;font-weight:900;padding:2px 8px;border-radius:10px;background:#FFF7ED;color:var(--accent);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.05em;}
+.liv-client{font-size:17px;font-weight:900;color:var(--text);line-height:1.2;}
+.liv-client.done{color:var(--green);text-decoration:line-through;opacity:0.6;}
+.liv-addr{font-size:14px;color:var(--muted);margin-top:3px;font-weight:600;}
+.liv-comment{font-size:13px;color:var(--red);margin-top:6px;font-weight:700;background:#FEF2F2;padding:6px 10px;border-radius:8px;}
+/* Gros bouton FAIT */
+.fait-btn{width:100%;margin-top:12px;padding:18px;border:none;border-radius:14px;background:var(--green);color:#fff;font-size:20px;font-weight:900;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 14px rgba(22,163,74,0.3);}
+.fait-btn.is-done{background:var(--bg);border:2px solid var(--border);color:var(--muted);box-shadow:none;font-size:16px;}
+.fait-btn.pulse{animation:donePulse 0.25s ease;}
+@keyframes donePulse{0%{transform:scale(1);}50%{transform:scale(0.95);}100%{transform:scale(1);}}
+/* Client actions */
+.client-actions{display:flex;gap:8px;margin-top:10px;}
+.client-action-btn{flex:1;padding:12px 8px;border:none;border-radius:12px;font-size:15px;font-weight:800;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;text-decoration:none;}
+.ca-call{background:#F0FDF4;color:var(--green);}
+.ca-sms{background:#EFF6FF;color:var(--blue);}
+/* Vis / Soufflerie */
+.methode-badge{display:inline-flex;align-items:center;gap:5px;font-size:13px;font-weight:800;padding:5px 12px;border-radius:20px;margin-top:6px;margin-right:4px;cursor:pointer;}
+.methode-vis{background:#EFF6FF;color:var(--blue);}
+.methode-soufflerie{background:#FFF7ED;color:var(--yellow);}
+.methode-inconnu{background:#F8FAFC;color:var(--muted);border:1px dashed var(--border);}
+/* ETA */
+.eta-badge{display:inline-block;font-size:12px;font-weight:800;padding:3px 9px;border-radius:20px;background:#F0FDF4;color:var(--green);margin-top:4px;margin-right:4px;}
+/* GPS */
+.gps-ok{background:#DCFCE7;border-left:4px solid var(--green);border-radius:8px;padding:8px 12px;margin-top:8px;font-size:13px;color:#166534;font-weight:700;}
+.gps-info{background:#F1F5F9;border-left:4px solid var(--muted);border-radius:8px;padding:8px 12px;margin-top:8px;font-size:13px;color:var(--muted);font-weight:600;}
+.gps-nav{color:var(--blue);font-weight:800;text-decoration:none;display:inline-block;margin-top:4px;font-size:13px;}
+/* METEO */
+.meteo-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:16px;font-size:12px;font-weight:700;background:#EFF6FF;color:var(--blue);margin-top:4px;}
+/* MAPS BTN */
+.maps-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:15px;background:var(--blue);color:#fff;font-size:15px;font-weight:800;text-decoration:none;border:none;cursor:pointer;font-family:inherit;}
+.maps-btn:active{opacity:0.9;}
+/* ERR */
+.err-box{background:#FEF2F2;border:2px solid var(--red);border-radius:12px;padding:14px 16px;font-size:15px;color:var(--red);font-weight:700;margin-bottom:12px;}
+/* PAUSE */
+.pause-alert{background:linear-gradient(135deg,#1D4ED8,#3B82F6);border-radius:16px;padding:14px 16px;margin-bottom:12px;}
+.pause-title{color:#fff;font-size:15px;font-weight:800;margin-bottom:4px;}
+.pause-text{font-size:13px;color:rgba(255,255,255,0.9);font-weight:600;line-height:1.5;}
+/* CONSO */
+.conso-box{background:linear-gradient(135deg,#FF6B00,#FF8C42);border-radius:14px;padding:16px;margin-bottom:12px;display:flex;align-items:center;gap:14px;}
+.conso-val{font-size:28px;font-weight:900;color:#fff;}
+.conso-label{font-size:12px;color:rgba(255,255,255,0.8);margin-top:2px;font-weight:600;}
+/* FLEET */
+.gps-bar{background:var(--card);border-radius:12px;padding:12px 14px;margin-bottom:10px;display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);font-weight:700;box-shadow:0 1px 4px rgba(0,0,0,0.06);}
+.depot-box{border-radius:16px;padding:18px;margin-bottom:12px;text-align:center;}
+.depot-box-green{background:linear-gradient(135deg,#16A34A,#22C55E);}
+.depot-box-yellow{background:linear-gradient(135deg,#D97706,#F59E0B);}
+.depot-box-blue{background:linear-gradient(135deg,#1D4ED8,#3B82F6);}
+.depot-box-title{font-size:20px;font-weight:900;color:#fff;margin-bottom:4px;}
+.depot-box-sub{font-size:13px;color:rgba(255,255,255,0.85);margin-bottom:12px;font-weight:600;}
+.driver-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);}
+.driver-row:last-child{border-bottom:none;}
+.driver-avatar{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:900;color:#fff;flex-shrink:0;}
+.driver-name{font-size:15px;font-weight:800;color:var(--text);}
+.driver-sub{font-size:12px;color:var(--muted);font-weight:600;margin-top:2px;}
+.status-pill{padding:5px 10px;border-radius:16px;font-size:12px;font-weight:800;}
+.status-route{background:#DCFCE7;color:#166534;}
+.status-waiting{background:#FEF3C7;color:#92400E;}
+.status-loading{background:#DBEAFE;color:#1E3A8A;}
+.status-unknown{background:#F1F5F9;color:var(--muted);}
+/* FUEL */
+.fuel-row{display:flex;align-items:center;padding:12px 0;border-bottom:1px solid var(--border);}
+.fuel-row:last-child{border-bottom:none;}
+.fuel-price{font-size:20px;font-weight:900;color:var(--accent);margin-left:auto;}
+.fuel-name{font-size:14px;font-weight:700;color:var(--text);}
+.fuel-addr{font-size:12px;color:var(--muted);font-weight:600;}
+/* REST */
+.rest-row{padding:12px 0;border-bottom:1px solid var(--border);}
+.rest-row:last-child{border-bottom:none;}
+.rest-type{font-size:11px;font-weight:800;padding:3px 8px;border-radius:14px;background:#EFF6FF;color:var(--blue);display:inline-block;margin-bottom:5px;text-transform:uppercase;}
+.rest-name{font-size:16px;font-weight:800;color:var(--text);}
+.rest-comment{font-size:13px;color:var(--muted);font-weight:600;margin-top:2px;}
+/* PROFILE */
+.profile-header{background:linear-gradient(135deg,var(--dark),#1E3A5F);border-radius:16px;padding:18px;margin-bottom:12px;}
+.profile-name{font-size:20px;font-weight:900;color:#fff;}
+.profile-sub{font-size:13px;color:#94A3B8;margin-top:3px;font-weight:600;}
+.conso-bar{margin-bottom:10px;}
+.conso-bar-label{display:flex;justify-content:space-between;font-size:13px;font-weight:700;margin-bottom:4px;}
+.conso-bar-track{background:var(--border);border-radius:8px;height:8px;}
+.conso-bar-fill{height:8px;border-radius:8px;transition:width 0.5s;}
+/* OVERLAY */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;align-items:flex-end;}
+.overlay.open{display:flex;}
+.overlay-panel{background:var(--card);border-radius:24px 24px 0 0;padding:22px 18px 40px;width:100%;max-width:500px;margin:0 auto;max-height:85vh;overflow-y:auto;}
+.overlay-title{font-size:19px;font-weight:900;color:var(--text);margin-bottom:18px;display:flex;justify-content:space-between;align-items:center;}
+.overlay-close{background:var(--bg);border:none;color:var(--muted);font-size:18px;cursor:pointer;border-radius:50%;width:34px;height:34px;display:flex;align-items:center;justify-content:center;}
+/* MANAGER PICKER */
+.mgr-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);cursor:pointer;}
+.mgr-row:last-child{border-bottom:none;}
+.mgr-row.selected{background:#F0FDF4;border-radius:10px;padding:12px 10px;margin:0 -10px;}
+.mgr-check{width:24px;height:24px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:14px;}
+.mgr-row.selected .mgr-check{background:var(--green);border-color:var(--green);color:#fff;}
+/* SETTINGS — driver mgmt */
+.driver-mgmt-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);}
+.driver-mgmt-row:last-child{border-bottom:none;}
+.remove-btn{background:var(--bg);border:none;color:var(--red);font-size:16px;cursor:pointer;border-radius:8px;padding:6px 8px;margin-left:auto;}
+/* SILO OVERLAY */
+.silo-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:300;align-items:flex-end;}
+.silo-overlay.open{display:flex;}
+.silo-panel{background:var(--card);border-radius:24px 24px 0 0;padding:22px 18px 44px;width:100%;max-width:500px;margin:0 auto;}
+.silo-panel-title{font-size:18px;font-weight:900;color:var(--text);margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;}
+.methode-picker{display:flex;gap:8px;margin-bottom:14px;}
+.methode-pick-btn{flex:1;padding:14px 6px;border-radius:12px;border:2px solid var(--border);background:var(--bg);font-size:15px;font-weight:800;font-family:inherit;cursor:pointer;}
+.methode-pick-btn.selected{border-color:var(--blue);background:#EFF6FF;color:var(--blue);}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">🚛</div>
+  <div>
+    <div class="header-title">Sud Ouest Aliment</div>
+    <div class="header-sub" id="header-sub">Bons de chargement</div>
+  </div>
+  <div class="header-right">
+    <button class="sos-btn-head" id="sos-btn-head" style="display:none;" onclick="sendSOS()">🆘 SOS</button>
+    <button class="settings-btn" onclick="showSettings()">⚙️</button>
+  </div>
+</header>
+
+<!-- PAGE TOURNÉE -->
+<div id="page-route" class="page active">
+  <!-- Sélection conducteur -->
+  <div id="step-driver">
+    <span class="section-label" style="margin-top:0">👋 Qui êtes-vous ?</span>
+    <div class="chip-grid" id="driver-grid"></div>
+  </div>
+  <!-- Conducteur sélectionné -->
+  <div id="step-pdf" style="display:none;">
+    <div class="driver-sel-card" id="driver-sel-card">
+      <div class="driver-sel-avatar" id="driver-sel-avatar">?</div>
+      <div>
+        <div class="driver-sel-name" id="driver-sel-name">–</div>
+        <div class="driver-sel-sub" id="driver-sel-sub">–</div>
+      </div>
+      <button class="change-btn" onclick="changeDriver()">Changer</button>
+    </div>
+    <input type="file" id="file-input" accept="application/pdf">
+    <button class="btn-big btn-orange" onclick="document.getElementById('file-input').click()" style="margin-bottom:10px;">
+      📄 Charger le bon de chargement
+    </button>
+    <div id="err-box" class="err-box" style="display:none;"></div>
+  </div>
+
+  <!-- Loading -->
+  <div id="loading" style="display:none;text-align:center;padding:40px 0;">
+    <div class="spinner"></div>
+    <div style="font-size:17px;font-weight:800;color:var(--text);">Lecture du bon en cours…</div>
+    <div style="font-size:13px;color:var(--muted);font-weight:600;margin-top:6px;" id="loading-sub"></div>
+  </div>
+
+  <!-- Résultats -->
+  <div id="results" style="display:none;">
+    <div id="truck-detected" style="display:none;background:#F0FDF4;border:2px solid var(--green);border-radius:12px;padding:10px 14px;margin-bottom:10px;font-size:14px;font-weight:800;color:var(--green);">
+      🚛 Camion : <span id="truck-plate"></span>
+    </div>
+    <div class="conso-box" id="conso-box" style="display:none;">
+      <span style="font-size:36px;">⛽</span>
+      <div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.8);font-weight:700;text-transform:uppercase;">Consommation estimée</div>
+        <div class="conso-val" id="conso-val">– L</div>
+        <div class="conso-label" id="conso-detail"></div>
+      </div>
+    </div>
+    <div class="pause-alert" id="pause-alert" style="display:none;">
+      <div class="pause-title">⏱️ Pause obligatoire</div>
+      <div class="pause-text" id="pause-text"></div>
+    </div>
+    <div class="summary-grid">
+      <div class="summary-card"><div class="summary-val" id="s-tournees">–</div><div class="summary-label">Tournées</div></div>
+      <div class="summary-card"><div class="summary-val" id="s-stops">–</div><div class="summary-label">Arrêts</div></div>
+      <div class="summary-card"><div class="summary-val" id="s-km">–</div><div class="summary-label">km total</div></div>
+      <div class="summary-card"><div class="summary-val" id="s-done" style="color:var(--green)">0</div><div class="summary-label">✅ Faits</div></div>
+    </div>
+    <div class="progress-wrap" style="margin:-4px 0 14px;"><div class="progress-fill" id="day-progress-fill" style="width:0%"></div></div>
+    <div id="result-title" style="font-size:13px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;"></div>
+    <div id="tournees-list"></div>
+    <button class="btn-sm" onclick="resetRoute()" style="width:100%;margin-top:8px;color:var(--red);">🗑 Effacer et recommencer</button>
+  </div>
+</div>
+
+<!-- PAGE FLOTTE -->
+<div id="page-fleet" class="page">
+  <div class="gps-bar" id="gps-bar"><span>📡</span><span id="gps-status-text">Activation GPS…</span></div>
+  <div id="depot-detected" style="display:none;" class="depot-box depot-box-green">
+    <div style="font-size:32px;margin-bottom:6px;">🏭</div>
+    <div class="depot-box-title" id="depot-name-detected">POMAREZ</div>
+    <div class="depot-box-sub">Vous êtes arrivé au dépôt !</div>
+    <button class="btn-big btn-green" onclick="confirmArrival()" style="max-width:320px;margin:0 auto;">✅ Signaler mon arrivée</button>
+  </div>
+  <div id="depot-waiting-box" style="display:none;" class="depot-box depot-box-yellow">
+    <div style="font-size:12px;color:rgba(255,255,255,0.8);font-weight:700;margin-bottom:4px;" id="waiting-depot-name"></div>
+    <div class="depot-box-title">🟡 En attente de chargement</div>
+    <div class="depot-box-sub" id="waiting-time">Arrivé à ––h––</div>
+    <button class="btn-big btn-blue" onclick="startLoading()" style="max-width:320px;margin:0 auto 10px;">🟠 Démarrer le chargement</button>
+    <button class="btn-big btn-red" onclick="confirmDeparture()" style="max-width:320px;margin:0 auto;">🚛 Je pars sans charger</button>
+  </div>
+  <div id="depot-loading-box" style="display:none;" class="depot-box depot-box-blue">
+    <div style="font-size:12px;color:rgba(255,255,255,0.8);font-weight:700;margin-bottom:4px;" id="loading-depot-name"></div>
+    <div class="depot-box-title">🟠 Chargement en cours</div>
+    <div style="font-size:18px;color:rgba(255,255,255,0.9);font-weight:700;margin:6px 0;" id="loading-elapsed">0 min</div>
+    <div class="progress-wrap"><div class="progress-fill" id="loading-bar" style="width:0%"></div></div>
+    <div style="font-size:13px;color:rgba(255,255,255,0.8);font-weight:700;margin-bottom:12px;" id="loading-pct">0%</div>
+    <button class="btn-big btn-green" onclick="finishLoading()" style="max-width:320px;margin:0 auto;">✅ Chargement terminé — Je pars</button>
+  </div>
+  <span class="section-label" style="margin-top:4px;">🏭 File d'attente dépôts</span>
+  <div class="card"><div style="padding:12px 16px;" id="depot-queue"><div style="color:var(--muted);font-size:14px;font-weight:600;text-align:center;padding:8px;">Aucun chauffeur en dépôt</div></div></div>
+  <span class="section-label">🚛 Équipe</span>
+  <div class="card"><div style="padding:0 16px;" id="fleet-list"><div style="color:var(--muted);font-size:14px;font-weight:600;text-align:center;padding:18px;">Chargement…</div></div></div>
+</div>
+
+<!-- PAGE CARBURANT -->
+<div id="page-fuel" class="page">
+  <span class="section-label" style="margin-top:0">⛽ Prix carburants</span>
+  <div style="font-size:13px;color:var(--muted);font-weight:600;margin-bottom:12px;" id="fuel-subtitle">Chargez un bon pour voir les stations de votre itinéraire</div>
+  <div id="fuel-loading" style="display:none;text-align:center;padding:28px;"><div class="spinner"></div></div>
+  <div id="fuel-list"></div>
+  <div class="card"><div style="padding:14px 16px;"><a href="https://www.prix-carburants.gouv.fr" target="_blank" style="color:var(--blue);font-weight:700;font-size:14px;">🔗 prix-carburants.gouv.fr</a></div></div>
+</div>
+
+<!-- PAGE REPOS -->
+<div id="page-rest" class="page">
+  <span class="section-label" style="margin-top:0">🅿️ Points de repos partagés</span>
+  <button class="btn-big btn-orange" onclick="addRestByGPS()" style="margin-bottom:8px;font-size:16px;padding:16px;">📍 Ajouter ma position actuelle</button>
+  <button class="btn-sm" onclick="showAddRestForm()" style="width:100%;margin-bottom:14px;">✏️ Ajouter manuellement</button>
+  <div id="add-rest-form" style="display:none;" class="card">
+    <div style="padding:14px 16px;border-bottom:1px solid var(--border);font-size:16px;font-weight:800;">Nouveau point</div>
+    <div style="padding:14px 16px;">
+      <input class="inp" id="rest-name" placeholder="Nom du lieu">
+      <select class="inp" id="rest-type">
+        <option value="parking">🅿️ Parking poids lourds</option>
+        <option value="aire">🛣️ Aire de repos</option>
+        <option value="restaurant">🍽️ Restaurant routier</option>
+        <option value="station">⛽ Station avec parking</option>
+        <option value="autre">📍 Autre</option>
+      </select>
+      <input class="inp" id="rest-comment" placeholder="Commentaire (optionnel)">
+      <button class="btn-big btn-green" onclick="saveRestPoint()" style="margin-bottom:8px;font-size:16px;padding:16px;">✅ Ajouter</button>
+      <button class="btn-sm" onclick="document.getElementById('add-rest-form').style.display='none'" style="width:100%;">Annuler</button>
+    </div>
+  </div>
+  <div id="rest-list"></div>
+</div>
+
+<!-- PAGE PROFIL -->
+<div id="page-profile" class="page">
+  <div class="profile-header" id="profile-header">
+    <div style="font-size:11px;color:#64748B;font-weight:700;text-transform:uppercase;margin-bottom:4px;">Conducteur</div>
+    <div class="profile-name" id="profile-name">Non sélectionné</div>
+    <div class="profile-sub" id="profile-truck"></div>
+    <div class="profile-sub" id="profile-conso-ref"></div>
+  </div>
+  <span class="section-label">📊 Statistiques du mois</span>
+  <div class="summary-grid">
+    <div class="summary-card"><div class="summary-val" id="stat-km">–</div><div class="summary-label">km</div></div>
+    <div class="summary-card"><div class="summary-val" id="stat-conso">–</div><div class="summary-label">Litres</div></div>
+    <div class="summary-card"><div class="summary-val" id="stat-tournees">–</div><div class="summary-label">Tournées</div></div>
+    <div class="summary-card"><div class="summary-val" id="stat-livraisons">–</div><div class="summary-label">Arrêts</div></div>
+  </div>
+  <span class="section-label">📈 Consommations équipe</span>
+  <div class="card"><div style="padding:14px 16px;" id="team-conso"></div></div>
+</div>
+
+<!-- SETTINGS OVERLAY -->
+<div id="settings-overlay" class="overlay" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="overlay-panel">
+    <div class="overlay-title">
+      <span>⚙️ Réglages</span>
+      <button class="overlay-close" onclick="document.getElementById('settings-overlay').classList.remove('open')">✕</button>
+    </div>
+    <!-- Manager -->
+    <div style="font-size:12px;font-weight:800;text-transform:uppercase;color:var(--muted);margin-bottom:8px;">📞 Manager à contacter (SOS)</div>
+    <div id="manager-list" style="margin-bottom:20px;padding-bottom:20px;border-bottom:2px solid var(--border);"></div>
+    <!-- Conducteurs -->
+    <div style="font-size:12px;font-weight:800;text-transform:uppercase;color:var(--muted);margin-bottom:8px;">👷 Conducteurs</div>
+    <div id="settings-drivers"></div>
+    <div style="display:flex;gap:8px;margin-top:14px;padding-top:14px;border-top:2px solid var(--border);">
+      <input class="inp" id="new-driver-inp" placeholder="Prénom Initiale (ex: Patrick F)" style="margin:0;flex:1" onkeydown="if(event.key==='Enter')addDriver()">
+      <button class="btn-big btn-orange" onclick="addDriver()" style="width:auto;padding:14px 16px;margin:0;font-size:15px;">+</button>
+    </div>
+    <div style="text-align:center;font-size:11px;color:var(--muted);font-weight:600;margin-top:18px;">Route SOA · version 2026-06-20c</div>
+  </div>
+</div>
+
+<!-- SILO OVERLAY -->
+<div id="silo-overlay" class="silo-overlay" onclick="if(event.target===this)closeSiloOverlay()">
+  <div class="silo-panel">
+    <div class="silo-panel-title">
+      <span id="silo-ov-title">Fiche silo</span>
+      <button class="overlay-close" onclick="closeSiloOverlay()">✕</button>
+    </div>
+    <div id="silo-ov-silo" style="font-size:13px;color:var(--muted);font-weight:700;margin-bottom:12px;"></div>
+    <div style="font-size:12px;font-weight:800;text-transform:uppercase;color:var(--muted);margin-bottom:8px;">⚙️ Méthode de déchargement</div>
+    <div class="methode-picker">
+      <button class="methode-pick-btn" id="pick-vis" onclick="pickMethSelect('VIS')">🔩 Vis</button>
+      <button class="methode-pick-btn" id="pick-soufflerie" onclick="pickMethSelect('SOUFFLERIE')">💨 Soufflerie</button>
+      <button class="methode-pick-btn" id="pick-inconnu" onclick="pickMethSelect('')">❓ Inconnu</button>
+    </div>
+    <div style="font-size:12px;font-weight:800;text-transform:uppercase;color:var(--muted);margin-bottom:8px;">📝 Commentaire / code portail</div>
+    <input class="inp" id="silo-ov-comment" placeholder="Ex: Pied avant silo 2, code 1234…" style="margin-bottom:14px;">
+    <button class="btn-big btn-green" onclick="saveSiloInfo()" style="font-size:17px;padding:16px;">✅ Enregistrer</button>
+  </div>
+</div>
+
+<nav class="bottom-nav">
+  <button class="nav-btn active" id="nav-route" onclick="showPage('route')"><span class="nav-icon">📋</span>Tournée</button>
+  <button class="nav-btn" id="nav-fleet" onclick="showPage('fleet')"><span class="nav-icon">🚛</span>Flotte</button>
+  <button class="nav-btn" id="nav-fuel" onclick="showPage('fuel')"><span class="nav-icon">⛽</span>Carburant</button>
+  <button class="nav-btn" id="nav-rest" onclick="showPage('rest')"><span class="nav-icon">🅿️</span>Repos</button>
+  <button class="nav-btn" id="nav-profile" onclick="showPage('profile')"><span class="nav-icon">👤</span>Profil</button>
+</nav>
+
+<script>
+// ─── CONSTANTES ────────────────────────────────────────────────────────────────
+const DC=["#FF6B00","#16A34A","#2563EB","#DC2626","#7C3AED","#D97706","#0891B2","#DB2777","#059669","#84CC16","#EA580C","#6366F1","#10B981","#0284C7"];
+const TC=["#FF6B00","#16A34A","#2563EB","#DC2626","#7C3AED","#D97706"];
+
+// Conducteurs par défaut (Semaine 26 — format Prénom Initiale)
+const DRIVERS_DEFAULT=[
+  {display:"Patrick F",  fullname:"PATRICK FEROU",      phone:"0662491700", color:DC[0]},
+  {display:"Christophe G",fullname:"CHRISTOPHE GARESTE",phone:"0760738220", color:DC[1]},
+  {display:"Christophe R",fullname:"CHRISTOPHE RICAU",  phone:"0612333830", color:DC[2]},
+  {display:"Pierre G",   fullname:"PIERRE GRUEL",       phone:"0682656446", color:DC[3]},
+  {display:"Isabelle D", fullname:"ISABELLE DEGERT",    phone:"0612248307", color:DC[4]},
+  {display:"Sonia M",    fullname:"SONIA MONCAUT",      phone:"0749315426", color:DC[5]},
+  {display:"Philippe L", fullname:"PHILIPPE LAGUILHON", phone:"0608827847", color:DC[6]},
+  {display:"José C",     fullname:"JOSE CLAISSE",       phone:"0612119005", color:DC[7]},
+  {display:"Thierry D",  fullname:"THIERRY DUFOURG",    phone:"0670551114", color:DC[8]},
+  {display:"Sébastien G",fullname:"SEBASTIEN GAYAN",    phone:"0620914498", color:DC[9]},
+  {display:"Michel M",   fullname:"MICHEL MAUVY",       phone:"0603198799", color:DC[10]},
+  {display:"Cyril O",    fullname:"CYRIL OGNJANOVIC",   phone:"0619216879", color:DC[11]},
+  {display:"Julien R",   fullname:"JULIEN RAMAT",       phone:"0620561069", color:DC[12]},
+  {display:"Reynald D",  fullname:"REYNALD DAUGREILH",  phone:"0681799118", color:DC[13]},
+];
+
+// Managers disponibles pour SOS
+const MANAGERS_DEFAULT=[
+  {display:"Hervé T",   fullname:"HERVÉ TÉATRE",   phone:"0671192899"},
+  {display:"Nicolas S", fullname:"NICOLAS SCZIGIOL",phone:"0627115801"},
+  {display:"Julien I",  fullname:"JULIEN INFRAY",   phone:"0612333825"},
+  {display:"Jessie L",  fullname:"JESSIE LAMBERT",  phone:"0757445428"},
+  {display:"Jessica P", fullname:"JESSICA PINEAU",  phone:"0757440514"},
+  {display:"JM C",      fullname:"JM CESCOSSE",     phone:"0786303771"},
+  {display:"Reynald D R",fullname:"REYNALD DAUGREILH RINGEVAL",phone:"0789832328"},
+];
+
+const DRIVER_CONSO={
+  "PATRICK FEROU":33.95,"CHRISTOPHE GARESTE":41.02,"CHRISTOPHE RICAU":42.31,
+  "PIERRE GRUEL":35.68,"ISABELLE DEGERT":37.07,"SONIA MONCAUT":37.50,
+  "PHILIPPE LAGUILHON":38.05,"JOSE CLAISSE":37.08,"THIERRY DUFOURG":36.96,
+  "SEBASTIEN GAYAN":34.13,"MICHEL MAUVY":43.44,"CYRIL OGNJANOVIC":38.73,"JULIEN RAMAT":41.94
+};
+
+const DEPOTS={
+  "POMAREZ":{lat:43.624572,lon:-0.842077,label:"SOA Pomarez"},
+  "HAUT-MAUCO":{lat:43.829777,lon:-0.538856,label:"SOA Haut-Mauco"},
+  "HM HAUT-MAUCO":{lat:43.829777,lon:-0.538856,label:"SOA Haut-Mauco"},
+  "OREGUE":{lat:43.390057,lon:-1.154551,label:"SOA Orègue"},
+  "CASTELNAU D AUZAN":{lat:43.950825,lon:0.068912,label:"SOA Castelnau d'Auzan"},
+  "CASTELNAU":{lat:43.950825,lon:0.068912,label:"SOA Castelnau d'Auzan"},
+  "BAIGTS DE BEARN":{lat:43.510562,lon:-0.843792,label:"SOA Baigts de Béarn"},
+  "SILO HAGETMAU":{lat:43.658534,lon:-0.582447,label:"Maïsadour Hagetmau"},
+  "GARAGE MINES HAGETMAU":{lat:43.658534,lon:-0.582447,label:"Maïsadour Hagetmau"},
+  "AUCH":{lat:43.694197,lon:0.606850,label:"SOA Auch"},
+  "EURALIS LESCAR":{lat:43.338415,lon:-0.458949,label:"Euralis Lescar"},
+  "VIVADOUR SAINT GERME":{lat:43.684308,lon:-0.159792,label:"Vivadour Saint Germe"},
+  "SILOS LACADEE ARANCE":{lat:43.420726,lon:-0.646763,label:"Silos Lacadée Arancé"},
+  "EURALIS CEREALE BAIGTS":{lat:43.509413,lon:-0.875651,label:"Euralis Céréale Baigts"},
+};
+const DEPOT_RADIUS=150;
+
+// ─── KV PARTAGÉ ────────────────────────────────────────────────────────────────
+async function kvGet(key){
+  try{const r=await fetch('/api/kv?key='+encodeURIComponent(key));if(!r.ok)return null;const d=await r.json();return d.value;}catch{return null;}
+}
+async function kvSet(key,value){
+  try{const r=await fetch('/api/kv',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key,value})});return r.ok;}catch{return false;}
+}
+async function kvMGet(keys){
+  if(!keys||!keys.length)return{};
+  try{const r=await fetch('/api/kv?keys='+encodeURIComponent(keys.join(',')));if(!r.ok)return{};const d=await r.json();return d.values||{};}catch{return{};}
+}
+
+const IS_IOS=/iPad|iPhone|iPod/.test(navigator.userAgent);
+function smsLink(phone,body){return`sms:${phone}${IS_IOS?'&':'?'}body=${encodeURIComponent(body)}`;}
+function telLink(phone){return`tel:${phone.replace(/[^0-9+]/g,'')}`;}
+
+// ─── ÉTAT GLOBAL ────────────────────────────────────────────────────────────────
+let drivers=loadDrivers(),sel=null,selFull=null,silosDB=null,currentTruck='',currentRouteData=null;
+let myLat=null,myLon=null,gpsWatcher=null,nearDepot=null,atDepot=null;
+let loadingInterval=null,loadingStart=null,loadingDuration=30;
+let fleetRefresh=null,deliveryStates={},tourStarted={};
+let managerPhone=localStorage.getItem('soa_manager_phone')||'';
+let silosExtra={};
+let currentSiloIdent=null,_pickedMeth='';
+let lastProgressPush=0;
+
+// ─── DRIVERS ───────────────────────────────────────────────────────────────────
+function loadDrivers(){
+  try{const s=localStorage.getItem('soa_d3');if(s)return JSON.parse(s);}catch{}
+  return DRIVERS_DEFAULT;
+}
+function saveDrivers(){try{localStorage.setItem('soa_d3',JSON.stringify(drivers));}catch{}}
+function driverByFullname(fn){return drivers.find(d=>d.fullname===fn)||drivers.find(d=>d.display===fn);}
+function cap(s){return(s||'').charAt(0).toUpperCase()+(s||'').slice(1).toLowerCase();}
+
+// ─── STORAGE SIMPLE ────────────────────────────────────────────────────────────
+function saveRoute(d){try{localStorage.setItem('soa_route',JSON.stringify(d));}catch{}}
+function loadRoute(){try{const s=localStorage.getItem('soa_route');return s?JSON.parse(s):null;}catch{return null;}}
+function saveDS(s){try{localStorage.setItem('soa_ds',JSON.stringify(s));}catch{}}
+function loadDS(){try{const s=localStorage.getItem('soa_ds');return s?JSON.parse(s):{};}catch{return{};}}
+function safeKey(tour,ordre){return String(tour).replace(/[^a-zA-Z0-9]/g,'')+'_'+String(ordre).replace(/[^a-zA-Z0-9]/g,'');}
+function cssEscape(s){return String(s).replace(/["\\]/g,'\\$&');}
+
+// ─── NAVIGATION ────────────────────────────────────────────────────────────────
+function showPage(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  document.getElementById('nav-'+name).classList.add('active');
+  if(name==='fleet'){startGPS();loadFleet();if(!fleetRefresh)fleetRefresh=setInterval(loadFleet,30000);}
+  else if(fleetRefresh){clearInterval(fleetRefresh);fleetRefresh=null;}
+  if(name==='fuel')loadFuel();
+  if(name==='rest')renderRestPoints();
+  if(name==='profile')renderProfile();
+}
+
+// ─── CONDUCTEUR ────────────────────────────────────────────────────────────────
+function renderDrivers(){
+  const g=document.getElementById('driver-grid');g.innerHTML='';
+  drivers.forEach(d=>{
+    const c=document.createElement('div');
+    c.className='chip'+(sel===d.display||sel===d.fullname?' active':'');
+    c.style.setProperty('--c',d.color);
+    c.innerHTML=`<div class="cdot"></div>${d.display||d.name||''}`;
+    c.onclick=()=>selectDriver(d.display);
+    g.appendChild(c);
+  });
+}
+
+function selectDriver(display,skipSave){
+  const d=drivers.find(x=>x.display===display||x.name===display);
+  if(!d)return;
+  sel=d.display;selFull=d.fullname||d.name||d.display;
+  if(!skipSave)try{localStorage.setItem('soa_selected_driver',sel);}catch{}
+  // Masquer la grille, afficher la carte conducteur
+  document.getElementById('step-driver').style.display='none';
+  document.getElementById('step-pdf').style.display='block';
+  const av=document.getElementById('driver-sel-avatar');
+  av.textContent=sel.charAt(0);av.style.background=d.color;
+  document.getElementById('driver-sel-card').style.borderLeftColor=d.color;
+  document.getElementById('driver-sel-name').textContent=sel;
+  const truck=localStorage.getItem('soa_truck_'+sel)||'';
+  document.getElementById('driver-sel-sub').textContent=truck?`Camion : ${truck}`:'Chargez votre bon';
+  document.getElementById('sos-btn-head').style.display='block';
+  document.getElementById('header-sub').textContent=sel;
+  showErr('');
+  // Restaurer tournée sauvegardée
+  const saved=loadRoute();
+  if(saved&&(saved.conducteur===sel||saved.conducteur===selFull)){
+    deliveryStates=loadDS();
+    tourStarted=JSON.parse(localStorage.getItem('soa_tour_started')||'{}');
+    renderResults(saved,true);
+  }
+  Notification.requestPermission&&Notification.requestPermission();
+}
+
+function changeDriver(){
+  sel=null;selFull=null;
+  document.getElementById('step-driver').style.display='block';
+  document.getElementById('step-pdf').style.display='none';
+  document.getElementById('results').style.display='none';
+  document.getElementById('sos-btn-head').style.display='none';
+  document.getElementById('header-sub').textContent='Bons de chargement';
+  renderDrivers();
+}
+
+// ─── MANAGER / SOS ─────────────────────────────────────────────────────────────
+async function loadManagerPhone(){
+  const v=await kvGet('config:manager_phone');
+  if(v){managerPhone=v;localStorage.setItem('soa_manager_phone',v);}
+}
+async function setManager(phone,display){
+  managerPhone=phone;
+  localStorage.setItem('soa_manager_phone',phone);
+  localStorage.setItem('soa_manager_display',display);
+  await kvSet('config:manager_phone',phone);
+  renderManagerList();
+}
+function renderManagerList(){
+  const curPhone=managerPhone;
+  document.getElementById('manager-list').innerHTML=MANAGERS_DEFAULT.map(m=>`
+    <div class="mgr-row ${m.phone===curPhone?'selected':''}" onclick="setManager('${m.phone}','${m.display}')">
+      <div class="mgr-check">${m.phone===curPhone?'✓':''}</div>
+      <div style="flex:1">
+        <div style="font-size:16px;font-weight:800;">${m.display}</div>
+        <div style="font-size:13px;color:var(--muted);font-weight:600;">${m.phone}</div>
+      </div>
+      <a href="${telLink(m.phone)}" onclick="event.stopPropagation()" style="color:var(--blue);font-size:18px;text-decoration:none;">📞</a>
+    </div>`).join('');
+}
+function showSettings(){loadManagerPhone().then(renderManagerList);renderSettingsDrivers();document.getElementById('settings-overlay').classList.add('open');}
+
+function sendSOS(){
+  if(!managerPhone){alert('⚠️ Aucun manager sélectionné.\nOuvrez ⚙️ Réglages et choisissez un manager.');showSettings();return;}
+  if(!confirm('🆘 Envoyer une alerte SOS au manager avec votre position GPS ?'))return;
+  const when=new Date().toLocaleString('fr');
+  let loc='position GPS indisponible';
+  if(myLat&&myLon)loc=`https://www.google.com/maps?q=${myLat},${myLon}`;
+  const msg=`🆘 SOS Route SOA — ${sel||'Chauffeur'} — ${when} — ${loc}`;
+  window.location.href=smsLink(managerPhone,msg);
+}
+
+// ─── GPS ───────────────────────────────────────────────────────────────────────
+function startGPS(){
+  if(!navigator.geolocation||gpsWatcher)return;
+  gpsWatcher=navigator.geolocation.watchPosition(
+    pos=>{myLat=pos.coords.latitude;myLon=pos.coords.longitude;
+      const el=document.getElementById('gps-status-text');
+      if(el)el.textContent=`📡 GPS actif · précision ${Math.round(pos.coords.accuracy)}m`;
+      checkNearDepot();},
+    ()=>{const el=document.getElementById('gps-status-text');if(el)el.textContent='⚠️ GPS indisponible';},
+    {enableHighAccuracy:true,maximumAge:10000,timeout:15000}
+  );
+}
+function distanceTo(lat2,lon2){
+  if(!myLat||!myLon)return 99999;
+  const R=6371000,dLat=(lat2-myLat)*Math.PI/180,dLon=(lon2-myLon)*Math.PI/180;
+  const a=Math.sin(dLat/2)**2+Math.cos(myLat*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+function checkNearDepot(){
+  if(atDepot)return;
+  let closest=null,closestDist=99999;
+  for(const[key,depot] of Object.entries(DEPOTS)){const d=distanceTo(depot.lat,depot.lon);if(d<closestDist){closestDist=d;closest={key,...depot};}}
+  const el=document.getElementById('depot-name-detected');
+  if(closestDist<DEPOT_RADIUS&&(!nearDepot||nearDepot.key!==closest.key)){
+    nearDepot=closest;if(el)el.textContent=closest.label;
+    const db=document.getElementById('depot-detected');if(db)db.style.display='block';
+  }else if(closestDist>DEPOT_RADIUS*2){
+    const db=document.getElementById('depot-detected');if(db)db.style.display='none';
+    nearDepot=null;
+  }
+}
+
+// ─── DÉPÔT STATE ───────────────────────────────────────────────────────────────
+function saveDepotState(){try{localStorage.setItem('soa_depot_state',JSON.stringify({atDepot,loadingStart,loadingDuration}));}catch{}}
+function loadDepotState(){try{const s=localStorage.getItem('soa_depot_state');return s?JSON.parse(s):null;}catch{return null;}}
+function clearDepotState(){try{localStorage.removeItem('soa_depot_state');}catch{}}
+
+async function confirmArrival(){
+  if(!nearDepot)return;atDepot=nearDepot;
+  const now=new Date(),t=`${now.getHours()}h${now.getMinutes().toString().padStart(2,'0')}`;
+  const db=document.getElementById('depot-detected');if(db)db.style.display='none';
+  const wb=document.getElementById('depot-waiting-box');if(wb)wb.style.display='block';
+  const wdn=document.getElementById('waiting-depot-name');if(wdn)wdn.textContent=atDepot.label;
+  const wt=document.getElementById('waiting-time');if(wt)wt.textContent=`Arrivé à ${t}`;
+  saveDepotState();
+  await saveFleetStatus({name:selFull||sel,status:'WAITING',depot:atDepot.label,time:Date.now(),truck:currentTruck,arrivedAt:t});
+  loadFleet();
+}
+function startLoading(){
+  const wb=document.getElementById('depot-waiting-box');if(wb)wb.style.display='none';
+  const lb=document.getElementById('depot-loading-box');if(lb)lb.style.display='block';
+  const ldn=document.getElementById('loading-depot-name');if(ldn)ldn.textContent=atDepot?.label||'';
+  loadingStart=Date.now();loadingDuration=30;saveDepotState();
+  if(loadingInterval)clearInterval(loadingInterval);
+  loadingInterval=setInterval(updateBar,5000);updateBar();
+  saveFleetStatus({name:selFull||sel,status:'LOADING',depot:atDepot?.label,time:Date.now(),truck:currentTruck,loadingStart,loadingDuration});
+  loadFleet();
+}
+function updateBar(){
+  if(!loadingStart)return;
+  const el=Math.round((Date.now()-loadingStart)/60000);
+  const pct=Math.min(99,Math.round((el/loadingDuration)*100));
+  const bar=document.getElementById('loading-bar');if(bar)bar.style.width=pct+'%';
+  const pe=document.getElementById('loading-pct');if(pe)pe.textContent=pct+'%';
+  const ee=document.getElementById('loading-elapsed');if(ee)ee.textContent=el+' min';
+}
+async function finishLoading(){
+  if(loadingInterval){clearInterval(loadingInterval);loadingInterval=null;}
+  const bar=document.getElementById('loading-bar');if(bar)bar.style.width='100%';
+  setTimeout(()=>{const lb=document.getElementById('depot-loading-box');if(lb)lb.style.display='none';atDepot=null;nearDepot=null;},1500);
+  clearDepotState();
+  await saveFleetStatus({name:selFull||sel,status:'ROUTE',depot:'',time:Date.now(),truck:currentTruck});
+  loadFleet();
+}
+async function confirmDeparture(){
+  if(loadingInterval){clearInterval(loadingInterval);loadingInterval=null;}
+  ['depot-waiting-box','depot-loading-box','depot-detected'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});
+  atDepot=null;nearDepot=null;clearDepotState();
+  await saveFleetStatus({name:selFull||sel,status:'ROUTE',depot:'',time:Date.now(),truck:currentTruck});
+  loadFleet();
+}
+function restoreDepotState(){
+  const st=loadDepotState();if(!st||!st.atDepot)return;
+  atDepot=st.atDepot;
+  if(st.loadingStart){
+    loadingStart=st.loadingStart;loadingDuration=st.loadingDuration||30;
+    const lb=document.getElementById('depot-loading-box');if(lb)lb.style.display='block';
+    const ldn=document.getElementById('loading-depot-name');if(ldn)ldn.textContent=atDepot.label||'';
+    if(loadingInterval)clearInterval(loadingInterval);
+    loadingInterval=setInterval(updateBar,5000);updateBar();
+  }else{
+    const wb=document.getElementById('depot-waiting-box');if(wb)wb.style.display='block';
+    const wdn=document.getElementById('waiting-depot-name');if(wdn)wdn.textContent=atDepot.label||'';
+  }
+}
+
+// ─── FLOTTE ────────────────────────────────────────────────────────────────────
+async function saveFleetStatus(data){
+  const k='fleet:'+data.name,v=JSON.stringify(data);
+  const ok=await kvSet(k,v);
+  if(!ok)localStorage.setItem('shared_'+k,v);
+}
+async function pushProgress(done,total){
+  if(!selFull&&!sel)return;
+  const now=Date.now();if(now-lastProgressPush<4000)return;lastProgressPush=now;
+  await kvSet('progress:'+(selFull||sel),JSON.stringify({done,total,date:new Date().toLocaleDateString('fr'),time:now}));
+}
+
+async function loadFleet(){
+  const fd=document.getElementById('fleet-list'),qd=document.getElementById('depot-queue');
+  if(!fd||!qd)return;
+  const fKeys=drivers.map(d=>'fleet:'+(d.fullname||d.name||d.display));
+  const pKeys=drivers.map(d=>'progress:'+(d.fullname||d.name||d.display));
+  const[fVals,pVals]=await Promise.all([kvMGet(fKeys),kvMGet(pKeys)]);
+  const statuses=drivers.map(d=>{
+    const fn=d.fullname||d.name||d.display;
+    const raw=fVals['fleet:'+fn];const data=raw?JSON.parse(raw):null;
+    const praw=pVals['progress:'+fn];const progress=praw?JSON.parse(praw):null;
+    return data?{...data,color:d.color,displayName:d.display,progress}:{name:fn,status:'',time:0,color:d.color,displayName:d.display,truck:'',progress};
+  });
+
+  // File d'attente dépôts
+  const dm={};
+  statuses.forEach(s=>{if(['WAITING','LOADING'].includes(s.status)){const dep=s.depot||'?';if(!dm[dep])dm[dep]=[];dm[dep].push(s);}});
+  qd.innerHTML=!Object.keys(dm).length?'<div style="color:var(--muted);font-size:14px;font-weight:600;text-align:center;padding:12px;">Aucun chauffeur en dépôt</div>':
+    Object.entries(dm).map(([dep,drvs])=>`<div style="margin-bottom:10px;"><div style="font-size:15px;font-weight:900;margin-bottom:6px;">🏭 ${dep}</div>${drvs.map(d=>{const el=d.loadingStart?Math.round((Date.now()-d.loadingStart)/60000):0;const pct=d.loadingStart?Math.min(99,Math.round((el/(d.loadingDuration||30))*100)):0;return`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);"><div class="driver-avatar" style="background:${d.color};width:36px;height:36px;font-size:15px;">${(d.displayName||d.name||'?').charAt(0)}</div><div style="flex:1"><div style="font-size:14px;font-weight:800;">${d.displayName||d.name} · ${d.truck||'?'}</div>${d.status==='LOADING'?`<div style="font-size:12px;font-weight:700;color:var(--blue);">🟠 Chargement · ${el} min</div><div class="progress-wrap" style="height:8px;margin:4px 0 0;"><div class="progress-fill" style="width:${pct}%"></div></div>`:`<div style="font-size:12px;font-weight:700;color:var(--yellow);">🟡 En attente depuis ${d.arrivedAt||'--'}</div>`}</div></div>`;}).join('')}</div>`).join('');
+
+  // Liste équipe
+  const today=new Date().toLocaleDateString('fr');
+  fd.innerHTML=statuses.map(s=>{
+    const ago=s.time?`${Math.round((Date.now()-s.time)/60000)}min`:'?';
+    const badge=s.status==='ROUTE'?'<span class="status-pill status-route">🛣️ Route</span>':s.status==='WAITING'?'<span class="status-pill status-waiting">🟡 Attente</span>':s.status==='LOADING'?'<span class="status-pill status-loading">🟠 Chargement</span>':'<span class="status-pill status-unknown">❓</span>';
+    const showProg=s.progress&&s.progress.date===today&&s.progress.total>0;
+    const ppct=showProg?Math.round((s.progress.done/s.progress.total)*100):0;
+    return`<div class="driver-row" style="flex-direction:column;align-items:stretch;">
+      <div style="display:flex;align-items:center;gap:10px;width:100%;">
+        <div class="driver-avatar" style="background:${s.color}">${(s.displayName||s.name||'?').charAt(0)}</div>
+        <div style="flex:1"><div class="driver-name">${s.displayName||s.name}</div><div class="driver-sub">${s.truck||'–'} · ${ago}</div></div>
+        ${badge}
+      </div>
+      ${showProg?`<div style="margin:4px 0 0 52px;"><div class="progress-wrap" style="height:8px;margin:3px 0;"><div class="progress-fill" style="width:${ppct}%"></div></div><div style="font-size:11px;font-weight:700;color:var(--muted);">${s.progress.done}/${s.progress.total} arrêts effectués</div></div>`:''}
+    </div>`;
+  }).join('');
+}
+
+// ─── DÉPÔT GPS ─────────────────────────────────────────────────────────────────
+function resolveDepot(name){
+  if(!name)return null;
+  const n=normName(name);
+  for(const[k,d] of Object.entries(DEPOTS)){if(normName(k)===n)return d;}
+  for(const[k,d] of Object.entries(DEPOTS)){const kn=normName(k);if(kn.length>=4&&(n.includes(kn)||kn.includes(n)))return d;}
+  const nameWords=(name||'').toUpperCase().split(/[\s\-']+/).filter(w=>w.length>2);
+  let best=null,bestScore=0;
+  for(const[k,d] of Object.entries(DEPOTS)){const kw=k.toUpperCase().split(/[\s\-']+/).filter(w=>w.length>2);const score=kw.filter(w=>nameWords.includes(w)).length;if(score>bestScore&&score>=Math.min(2,kw.length)){bestScore=score;best=d;}}
+  return best;
+}
+
+// ─── SILOS ─────────────────────────────────────────────────────────────────────
+async function loadSilos(){if(silosDB)return;try{const r=await fetch('/silos.json');silosDB=await r.json();}catch{silosDB=[];}}
+function normName(s){return(s||'').toUpperCase().replace(/[ÀÂÄ]/g,'A').replace(/[ÉÈÊË]/g,'E').replace(/[ÎÏ]/g,'I').replace(/[ÔÖ]/g,'O').replace(/[ÙÛÜ]/g,'U').replace(/[^A-Z0-9]/g,'');}
+const STOPWORDS=new Set(['EARL','SCEA','GAEC','SARL','SAS','MR','MME','M','ET','DE','DU','LA','LE','LES','DES','SAINT','SA']);
+function siloMatch(a,b){return a===b||(a.length>=3&&b.length>=3&&(a.startsWith(b)||b.startsWith(a)));}
+function checkGPS(lat,lon,siloLabel,clientName){
+  if(!silosDB?.length)return null;
+  const siloNum=normName(siloLabel);const isGenericSilo=siloNum.length<4;
+  const clientWords=(clientName||'').toUpperCase().split(/[\s\-\/]+/).filter(w=>w.length>2&&!STOPWORDS.has(w));
+  if(!clientWords.length)return{status:'notfound',message:'❓ Silo non trouvé dans la carte GPS'};
+  let candidates=silosDB.filter(s=>{
+    if(!siloMatch(normName(s.silo),siloNum))return false;
+    const nameUpper=s.name.toUpperCase();const matchFlags=clientWords.map(w=>nameUpper.includes(w));const missCount=matchFlags.filter(f=>!f).length;
+    if(missCount===0)return true;if(missCount===1&&!isGenericSilo&&clientWords.length>=3&&!matchFlags[matchFlags.length-1])return true;return false;
+  });
+  if(!candidates.length)return{status:'notfound',message:'❓ Silo non trouvé dans la carte GPS'};
+  if(candidates.length>1&&lat&&lon){const R=6371000;candidates=candidates.map(s=>{const dLat=(s.lat-lat)*Math.PI/180,dLon=(s.lon-lon)*Math.PI/180;const a=Math.sin(dLat/2)**2+Math.cos(lat*Math.PI/180)*Math.cos(s.lat*Math.PI/180)*Math.sin(dLon/2)**2;const dist=R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));return{...s,dist};}).sort((a,b)=>a.dist-b.dist);}
+  return{status:'ok',message:`✅ GPS confirmé · ${candidates[0].silo}`,silo:candidates[0]};
+}
+
+// ─── GÉOCODAGE DE SECOURS (Base Adresse Nationale, via notre proxy serveur) ────
+// Utilisé uniquement quand un client n'a NI coordonnées dans le PDF NI silo reconnu
+// dans la base interne — sinon le dénivelé/l'ETA/Maps n'ont aucun point pour ce client.
+// Passe par /api/geocode (serveur-à-serveur) plutôt qu'un appel direct depuis le
+// téléphone, pour éviter les blocages CORS/réseau mobile qui rendaient le géocodage
+// silencieusement inopérant sur certains appareils.
+let geoCache={};
+try{
+  geoCache=JSON.parse(localStorage.getItem('soa_geocache')||'{}');
+  // Purge des échecs mémorisés par d'anciennes versions de l'app — un échec ne doit
+  // JAMAIS bloquer définitivement une nouvelle tentative (ex: simple coupure réseau
+  // au moment du premier essai). Seuls les succès ont vocation à être mis en cache.
+  let purged=false;
+  for(const k in geoCache){if(!geoCache[k]){delete geoCache[k];purged=true;}}
+  if(purged)localStorage.setItem('soa_geocache',JSON.stringify(geoCache));
+}catch{geoCache={};}
+function saveGeoCache(){try{localStorage.setItem('soa_geocache',JSON.stringify(geoCache));}catch{}}
+function geoKey(adresse,cp,ville){return normName(`${adresse}|${cp}|${ville}`);}
+
+// Remplit l.lat/l.lon pour chaque livraison de toutes les tournées, dans cet ordre
+// de priorité : silo confirmé > coordonnées déjà présentes (PDF) > géocodage d'adresse
+// (un seul appel groupé au serveur pour toute la tournée, plutôt qu'un par client).
+// Diagnostic visible dans l'app (affiché dans le message "Dénivelé indisponible")
+// pour savoir précisément où ça bloque sans avoir besoin d'accéder à la console du
+// téléphone : rien à localiser ? erreur réseau/serveur ? adresses non trouvées ?
+window._lastGeoDebug=null;
+
+// Quand un même client a plusieurs silos, le bon ne répète pas toujours l'adresse sur
+// chaque ligne — sans ça, les silos suivants n'ont rien à localiser. On reporte
+// l'adresse connue d'un silo du client sur ses autres silos de la même tournée.
+// (Même logique que côté serveur — appliquée ici aussi pour que les tournées déjà
+// enregistrées avant cette correction se réparent automatiquement, sans recharger le PDF.)
+// Deux noms de client sont considérés comme "le même client" si l'un contient l'autre
+// une fois normalisé — gère le cas où le PDF abrège ou complète le nom différemment
+// d'une ligne de silo à l'autre (ex: "GAEC L'YDEAL" vs "GAEC L'YDEAL CLT CANARDS").
+function clientNamesMatch(a,b){
+  if(!a||!b)return false;
+  if(a===b)return true;
+  return a.length>=4&&b.length>=4&&(a.includes(b)||b.includes(a));
+}
+function backfillClientAddresses(tournees){
+  for(const t of tournees){
+    const groups=[]; // [{key, items:[]}]
+    for(const l of t.livraisons){
+      const k=normName(l.client);
+      if(!k)continue;
+      let g=groups.find(gr=>clientNamesMatch(gr.key,k));
+      if(g){g.items.push(l);if(k.length>g.key.length)g.key=k;}
+      else groups.push({key:k,items:[l]});
+    }
+    for(const g of groups){
+      if(g.items.length<2)continue;
+      const ref=g.items.find(l=>l.adresse&&l.ville);
+      if(!ref)continue;
+      for(const l of g.items){
+        if(!l.adresse)l.adresse=ref.adresse;
+        if(!l.cp)l.cp=ref.cp;
+        if(!l.ville)l.ville=ref.ville;
+      }
+    }
+  }
+}
+
+async function enrichCoordinates(tournees){
+  backfillClientAddresses(tournees);
+  const toGeocode=[]; // {key, item, q, cp}
+  let totalLivraisons=0,confirmedSilo=0,alreadyHadCoords=0,noAddress=0,noAddressNames=[];
+  for(const t of tournees){
+    for(const l of t.livraisons){
+      totalLivraisons++;
+      const gps0=checkGPS(l.lat,l.lon,l.silo_client,l.client);
+      if(gps0&&gps0.status==='ok'&&gps0.silo){l.lat=gps0.silo.lat;l.lon=gps0.silo.lon;confirmedSilo++;continue;}
+      if(l.lat&&l.lon){alreadyHadCoords++;continue;} // déjà fourni par le PDF, on le garde
+      if(!l.adresse&&!l.ville){noAddress++;noAddressNames.push(l.client||'?');continue;} // rien à géocoder
+      const k=geoKey(l.adresse,l.cp,l.ville);
+      if(geoCache[k]){l.lat=geoCache[k].lat;l.lon=geoCache[k].lon;continue;} // succès déjà connu
+      // Pas de cache, ou échec précédent : on retente systématiquement.
+      toGeocode.push({key:k,livraison:l,q:`${l.adresse||''} ${l.ville||''}`.trim(),cp:l.cp||''});
+    }
+  }
+  if(!toGeocode.length){
+    window._lastGeoDebug={totalLivraisons,confirmedSilo,alreadyHadCoords,noAddress,noAddressNames,attempted:0};
+    return;
+  }
+  try{
+    const items=toGeocode.map(g=>({key:g.key,q:g.q,cp:g.cp}));
+    const r=await fetch('/api/geocode',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({items})});
+    if(!r.ok){
+      let body='';try{body=(await r.text()).slice(0,150);}catch{}
+      window._lastGeoDebug={totalLivraisons,confirmedSilo,alreadyHadCoords,noAddress,noAddressNames,attempted:toGeocode.length,httpError:r.status,body};
+      return;
+    }
+    const{results}=await r.json();
+    let success=0;
+    for(const g of toGeocode){
+      const res=results?.[g.key]||null;
+      if(res){geoCache[g.key]=res;g.livraison.lat=res.lat;g.livraison.lon=res.lon;success++;} // on ne mémorise QUE les succès
+    }
+    saveGeoCache();
+    window._lastGeoDebug={totalLivraisons,confirmedSilo,alreadyHadCoords,noAddress,attempted:toGeocode.length,success};
+  }catch(e){
+    window._lastGeoDebug={totalLivraisons,confirmedSilo,alreadyHadCoords,noAddress,attempted:toGeocode.length,networkError:e.message||'inconnue'};
+  }
+}
+
+// ─── SILOS EXTRA (vis/soufflerie) ──────────────────────────────────────────────
+async function loadSilosExtra(){
+  try{
+    const v=await kvGet('silos_extra');
+    if(v){silosExtra=JSON.parse(v);return;}
+    await loadSilos();
+    if(silosDB?.length){silosDB.forEach(s=>{const id=s.code_client||normName(s.name)+'_'+normName(s.silo);if(!silosExtra[id])silosExtra[id]={methode:'',comment:s.commentaire||''};});}
+  }catch{silosExtra={};}
+}
+async function saveSilosExtra(){try{await kvSet('silos_extra',JSON.stringify(silosExtra));}catch{}}
+function clientIdent(client,siloLabel,matchedCode){return matchedCode||(normName(client)+'_'+normName(siloLabel||''));}
+
+function openSiloOverlay(ident,clientName,siloLabel){
+  currentSiloIdent=ident;const extra=silosExtra[ident]||{};
+  document.getElementById('silo-ov-title').textContent=clientName||'Fiche silo';
+  document.getElementById('silo-ov-silo').textContent=siloLabel?`Silo : ${siloLabel}`:'';
+  document.getElementById('silo-ov-comment').value=extra.comment||'';
+  _pickedMeth=extra.methode||'';
+  ['vis','soufflerie','inconnu'].forEach(k=>document.getElementById('pick-'+k)?.classList.remove('selected'));
+  const id=_pickedMeth==='VIS'?'pick-vis':_pickedMeth==='SOUFFLERIE'?'pick-soufflerie':'pick-inconnu';
+  document.getElementById(id)?.classList.add('selected');
+  document.getElementById('silo-overlay').classList.add('open');
+}
+function closeSiloOverlay(){document.getElementById('silo-overlay').classList.remove('open');currentSiloIdent=null;}
+function pickMethSelect(m){
+  _pickedMeth=m;
+  ['vis','soufflerie','inconnu'].forEach(k=>document.getElementById('pick-'+k)?.classList.remove('selected'));
+  document.getElementById(m==='VIS'?'pick-vis':m==='SOUFFLERIE'?'pick-soufflerie':'pick-inconnu')?.classList.add('selected');
+}
+async function saveSiloInfo(){
+  if(!currentSiloIdent)return;
+  const extra=silosExtra[currentSiloIdent]||{};
+  silosExtra[currentSiloIdent]={...extra,methode:_pickedMeth,comment:document.getElementById('silo-ov-comment').value.trim()};
+  await saveSilosExtra();closeSiloOverlay();
+  if(currentRouteData)renderResults(currentRouteData,true);
+}
+
+// ─── ETA ───────────────────────────────────────────────────────────────────────
+function loadTourSettings(){try{return{avgSpeed:55,roadFactor:1.3,unloadVis:20,unloadSoufflerie:30,unloadInconnu:25,...JSON.parse(localStorage.getItem('soa_tour_settings')||'{}')};}catch{return{avgSpeed:55,roadFactor:1.3,unloadVis:20,unloadSoufflerie:30,unloadInconnu:25};}}
+// Retourne les minutes depuis minuit (nombre brut), ou null si non calculable.
+// C'est une estimation à vol d'oiseau × facteur routier — jamais un horaire garanti,
+// d'où la fourchette ±20 min utilisée pour l'affichage et le SMS.
+function computeETAMin(t,stopIndex,methode){
+  const ts=loadTourSettings();if(!t.depart)return null;
+  const[dh,dm]=(t.depart||'0h0').replace('h',':').split(':').map(Number);
+  let elapsed=0;
+  for(let i=0;i<=stopIndex;i++){
+    const l=t.livraisons[i];const prev=i===0?null:t.livraisons[i-1];
+    if(i===0){elapsed+=30;}
+    else if(prev?.lat&&prev?.lon&&l.lat&&l.lon){const R=6371,dLat=(l.lat-prev.lat)*Math.PI/180,dLon=(l.lon-prev.lon)*Math.PI/180;const a=Math.sin(dLat/2)**2+Math.cos(prev.lat*Math.PI/180)*Math.cos(l.lat*Math.PI/180)*Math.sin(dLon/2)**2;const km=R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a))*ts.roadFactor;elapsed+=Math.round(km/ts.avgSpeed*60);}
+    else{elapsed+=25;}
+    if(i<stopIndex)elapsed+=methode==='VIS'?ts.unloadVis:methode==='SOUFFLERIE'?ts.unloadSoufflerie:ts.unloadInconnu;
+  }
+  return(dh*60+dm)+elapsed;
+}
+function fmtHM(totMin){const m=((totMin%1440)+1440)%1440;return`${Math.floor(m/60)}h${(m%60).toString().padStart(2,'0')}`;}
+// Badge affiché sur la fiche : heure ponctuelle, simple à lire d'un coup d'œil.
+function computeETA(t,stopIndex,methode){const m=computeETAMin(t,stopIndex,methode);return m===null?null:`~${fmtHM(m)}`;}
+// Fourchette ±20 min utilisée dans le SMS au client — plus honnête qu'une heure pile,
+// vu que l'estimation ne tient pas compte du trafic réel.
+const ETA_MARGIN_MIN=20;
+function computeETARange(t,stopIndex,methode){
+  const m=computeETAMin(t,stopIndex,methode);if(m===null)return null;
+  return`entre ${fmtHM(m-ETA_MARGIN_MIN)} et ${fmtHM(m+ETA_MARGIN_MIN)}`;
+}
+
+// ─── SMS ───────────────────────────────────────────────────────────────────────
+function buildSmsCourtoisie(clientName,driverDisplay,etaRange){
+  const prenom=driverDisplay?cap(driverDisplay.split(' ')[0]):'Le chauffeur';
+  return`Bonjour, ${prenom} de Sud Ouest Aliment sera chez vous${etaRange?` ${etaRange}`:''}. Merci de préparer l'accès. À tout à l'heure !`;
+}
+
+// ─── MÉTÉO ─────────────────────────────────────────────────────────────────────
+function getWIcon(c){if(c===0)return'☀️';if(c<=2)return'⛅';if(c<=3)return'☁️';if(c<=49)return'🌫️';if(c<=69)return'🌧️';if(c<=79)return'🌨️';if(c<=99)return'⛈️';return'🌤️';}
+
+// ─── ANALYSE PDF ───────────────────────────────────────────────────────────────
+document.getElementById('file-input').addEventListener('change',function(e){
+  const f=e.target.files[0];if(!f)return;
+  if(f.type!=='application/pdf'){showErr('Veuillez choisir un fichier PDF.');return;}
+  analyze(f);this.value='';
+});
+
+async function analyze(file){
+  showLoading(true);showErr('');
+  document.getElementById('results').style.display='none';
+  await loadSilos();
+  try{
+    const b64=await toB64(file);
+    const resp=await fetch('/api/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({base64:b64,conducteur:selFull||sel})});
+    const data=await resp.json();
+    if(!resp.ok)throw new Error(data.error||'Erreur serveur');
+    if(!data.tournees?.length){showLoading(false);showErr(data.erreur||'Aucune tournée trouvée pour '+(sel||selFull));}
+    else{
+      saveRoute(data);deliveryStates={};saveDS({});tourStarted={};localStorage.removeItem('soa_tour_started');
+      const sub=document.getElementById('loading-sub');if(sub)sub.textContent='Localisation des clients…';
+      await renderResults(data,false); // garde le spinner visible le temps du géocodage initial
+      showLoading(false);
+    }
+  }catch(e){showLoading(false);showErr('Erreur: '+e.message);}
+}
+function toB64(f){return new Promise((r,j)=>{const rd=new FileReader();rd.onload=()=>r(rd.result.split(',')[1]);rd.onerror=()=>j(new Error('Lecture échouée'));rd.readAsDataURL(f);});}
+
+// ─── RENDU RÉSULTATS ───────────────────────────────────────────────────────────
+async function renderResults(data,fromCache=false){
+  currentRouteData=data;
+  await Promise.all([loadSilosExtra(),loadSilos()]);
+  const km=data.tournees.reduce((a,t)=>a+(t.km||0),0);
+  const stops=data.tournees.reduce((a,t)=>a+t.livraisons.length,0);
+  const conso=DRIVER_CONSO[selFull]||DRIVER_CONSO[sel]||38;
+  const litres=Math.round(km*conso/100);
+  const doneCount=Object.values(deliveryStates).filter(v=>v).length;
+
+  if(data.camion){currentTruck=data.camion;localStorage.setItem('soa_truck_'+sel,data.camion);const tp=document.getElementById('truck-plate');if(tp)tp.textContent=data.camion;const td=document.getElementById('truck-detected');if(td)td.style.display='block';const ds=document.getElementById('driver-sel-sub');if(ds)ds.textContent=`Camion : ${data.camion}`;}
+  const cv=document.getElementById('conso-val');if(cv)cv.textContent=litres+' L';
+  const cd=document.getElementById('conso-detail');if(cd)cd.textContent=`${km} km × ${conso} L/100km`;
+  const cb=document.getElementById('conso-box');if(cb)cb.style.display='flex';
+  document.getElementById('s-tournees').textContent=data.tournees.length;
+  document.getElementById('s-stops').textContent=stops;
+  document.getElementById('s-km').textContent=km+' km';
+  document.getElementById('s-done').textContent=doneCount+'/'+stops;
+  updateProgress(doneCount,stops);
+
+  if(km/70>4.5){
+    const dep=data.tournees[0]?.depart||'06h00';
+    const[h,m]=(dep||'0h0').replace('h',':').split(':').map(Number);
+    const pm=(h*60+m)+270;
+    const pa=document.getElementById('pause-alert');if(pa)pa.style.display='block';
+    const pt=document.getElementById('pause-text');if(pt)pt.innerHTML=`Avec ${km} km, pause <strong>45 min</strong> obligatoire vers <strong>${Math.floor(pm/60)}h${(pm%60).toString().padStart(2,'0')}</strong> · voir onglet 🅿️ Repos`;
+  }
+  if(!fromCache)saveStats(km,litres,data.tournees.length,stops);
+
+  document.getElementById('result-title').textContent=`📅 ${data.date||''} · ${data.conducteur||sel||''}`;
+
+  // Météo en arrière-plan
+  const cities=[...new Map(data.tournees.flatMap(t=>t.livraisons.map(l=>[l.ville,{v:l.ville,la:l.lat,lo:l.lon}]))).values()];
+  const weatherMap={};
+  await Promise.all(cities.filter(c=>c.la&&c.lo).map(async c=>{
+    try{const wr=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${c.la}&longitude=${c.lo}&current=temperature_2m,weathercode&timezone=Europe/Paris`);const wd=await wr.json();if(wd.current)weatherMap[c.v]={temp:Math.round(wd.current.temperature_2m),code:wd.current.weathercode};}catch{}
+  }));
+
+  // Coordonnées GPS de chaque livraison — étape cruciale dont dépendent le dénivelé,
+  // l'ETA et le trajet Google Maps. Deux sources, dans cet ordre de priorité :
+  //  1. Le silo confirmé dans la base GPS interne (le plus fiable)
+  //  2. Si absent : géocodage de l'adresse postale via l'API officielle du gouvernement
+  //     (Base Adresse Nationale) — gratuite, sans clé, très fiable pour les adresses FR.
+  // Avant cette étape, un client non reconnu dans la base silos n'avait simplement
+  // AUCUNE coordonnée si le PDF n'en fournissait pas, d'où le dénivelé indisponible.
+  await enrichCoordinates(data.tournees);
+
+  const sorted=[...data.tournees].sort((a,b)=>{
+    const ad=a.livraisons.every(l=>deliveryStates[safeKey(a.tour,l.ordre)]);
+    const bd=b.livraisons.every(l=>deliveryStates[safeKey(b.tour,l.ordre)]);
+    return ad===bd?0:ad?1:-1;
+  });
+  _renderedTournees=sorted; // référencé par le bouton "réessayer" du dénivelé
+
+  const list=document.getElementById('tournees-list');list.innerHTML='';
+  sorted.forEach((t,ti)=>{
+    const col=TC[ti%TC.length];
+    const allDone=t.livraisons.every(l=>deliveryStates[safeKey(t.tour,l.ordre)]);
+    const tourKey='tour_'+safeKey(t.tour,ti);
+    const started=!!tourStarted[tourKey];
+    const depotName=t.site_chargement||data.depot_depart||'Pomarez';
+    const depotGPS=resolveDepot(depotName);
+    const depStart=depotGPS?`${depotGPS.lat},${depotGPS.lon}`:encodeURIComponent(depotName+', France');
+    const depInterGPS=t.depot_intermediaire?resolveDepot(t.depot_intermediaire):null;
+    const depInter=t.depot_intermediaire?(depInterGPS?`${depInterGPS.lat},${depInterGPS.lon}`:encodeURIComponent(t.depot_intermediaire+', France')):null;
+    const livW=t.livraisons.map(l=>(l.lat&&l.lon)?`${l.lat},${l.lon}`:encodeURIComponent(`${l.adresse}, ${l.cp} ${l.ville}`));
+    const allWp=depInter?[depInter,...livW]:livW;
+    const mapsUrl=`https://www.google.com/maps/dir/?api=1&origin=${depStart}&destination=${depStart}&waypoints=${allWp.join('|')}&travelmode=driving`;
+    const card=document.createElement('div');card.className='card'+(allDone?' done':'');
+
+    const rows=t.livraisons.map((l,i)=>{
+      const key=safeKey(t.tour,l.ordre);const done=deliveryStates[key]||false;
+      const isReprise=(l.type||'').toUpperCase().includes('REPRISE');
+      const ident=clientIdent(l.client,l.silo_client,l.code_client);
+      const extra=silosExtra[ident]||{};
+      // Méthode : priorité à ce qui vient du PDF, sinon silosExtra
+      const methode=(l.methode||extra.methode||'').toUpperCase();
+      const clientPhone=l.phone||'';
+      const w=weatherMap[l.ville];
+      const wHtml=w?`<span class="meteo-badge">${getWIcon(w.code)} ${w.temp}°C</span> `:'';
+      const eta=started?computeETA(t,i,methode):'';
+      const etaRange=started?computeETARange(t,i,methode):'';
+      const etaHtml=eta?`<span class="eta-badge">⏱ ${eta}</span>`:'';
+      const comment=extra.comment||l.commentaire||'';
+      const commentHtml=comment?`<div class="liv-comment">⚠️ ${comment}</div>`:'';
+      const gps=checkGPS(l.lat,l.lon,l.silo_client,l.client);
+      let gpsHtml='';
+      if(gps){const cls=gps.status==='ok'?'gps-ok':'gps-info';let nav='';if(gps.status==='ok'&&gps.silo){const nu=`https://www.google.com/maps/dir/?api=1&destination=${gps.silo.lat},${gps.silo.lon}&travelmode=driving`;nav=`<br><a class="gps-nav" href="${nu}" target="_blank" onclick="event.stopPropagation()">📍 Naviguer vers ce silo</a>`;}gpsHtml=`<div class="${cls}">${gps.message}${nav}</div>`;}
+      const methBadge=methode==='VIS'?`<span class="methode-badge methode-vis" onclick="openSiloOverlay('${ident}','${esc(l.client)}','${esc(l.silo_client||'')}')">🔩 Vis</span>`:methode==='SOUFFLERIE'?`<span class="methode-badge methode-soufflerie" onclick="openSiloOverlay('${ident}','${esc(l.client)}','${esc(l.silo_client||'')}')">💨 Soufflerie</span>`:`<span class="methode-badge methode-inconnu" onclick="openSiloOverlay('${ident}','${esc(l.client)}','${esc(l.silo_client||'')}')">⚙️ Méthode ?</span>`;
+      const actHtml=clientPhone?`<div class="client-actions"><a class="client-action-btn ca-call" href="${telLink(clientPhone)}" onclick="event.stopPropagation()">📞 Appeler</a><a class="client-action-btn ca-sms" href="${smsLink(clientPhone,buildSmsCourtoisie(l.client,sel,etaRange))}" onclick="event.stopPropagation()">💬 SMS ETA</a></div>`:'';
+      return`<div class="liv-row ${done?'done':''}" data-key="${key}" data-total="${t.livraisons.length}" data-allstops="${stops}">
+        <div style="display:flex;align-items:flex-start;gap:12px;">
+          <div class="liv-num" data-ordre="${l.ordre}" data-color="${isReprise?'#D97706':col}" style="background:${done?'#16A34A':isReprise?'#D97706':col};">${done?'✓':isReprise?'↩':l.ordre}</div>
+          <div style="flex:1;min-width:0;">
+            ${isReprise?'<div class="liv-type-reprise">🔄 REPRISE</div>':''}
+            <div class="liv-client ${done?'done':''}">${l.client}</div>
+            <div class="liv-addr">${l.adresse||''}, ${l.cp||''} ${l.ville||''}</div>
+            ${l.silo_client?`<div style="font-size:12px;font-weight:700;color:var(--muted);margin-top:2px;">Silo : ${l.silo_client}</div>`:''}
+            <div style="margin-top:5px;">${wHtml}${etaHtml}${methBadge}</div>
+            ${commentHtml}${gpsHtml}${actHtml}
+          </div>
+        </div>
+        <button type="button" class="fait-btn ${done?'is-done':''}">${done?'↩️ Annuler':'✅ Fait'}</button>
+      </div>`;
+    }).join('');
+
+    const startBtn=!started?`<button class="tournee-start-btn" data-tourkey="${tourKey}">▶️ Démarrer la tournée</button>`:
+      `<div class="tournee-started">✅ Tournée en cours · ETA activé</div>`;
+
+    card.innerHTML=`
+      <div class="tournee-header" style="background:${allDone?'#16A34A':col};">
+        <div style="flex:1;"><div class="tournee-num">${allDone?'✅ ':''}Tournée ${t.tour}</div><div class="tournee-time">${t.depart||''} → ${t.arrivee||''}</div></div>
+        <span class="tournee-km">${t.km||'?'} km</span>
+      </div>
+      ${startBtn}
+      ${t.depot_intermediaire?`<div class="depot-inter"><span style="font-size:20px;">🏭</span><div><div class="depot-inter-label">Chargement intermédiaire</div><div class="depot-inter-name">${t.depot_intermediaire}</div></div></div>`:''}
+      <div id="deniv-t${ti}"></div>
+      ${rows}
+      <div style="display:flex;gap:8px;">
+        <a class="maps-btn" href="${mapsUrl}" target="_blank" style="flex:2;border-radius:0 0 0 14px;">🗺️ Google Maps</a>
+        <button class="maps-btn" onclick="optimizeRoute(${ti})" style="flex:1;background:#EFF6FF;color:var(--blue);border-top:none;border-radius:0 0 14px 0;">🔀 Optimiser</button>
+      </div>`;
+    list.appendChild(card);
+    fetchDenivele(t,ti);
+  });
+  document.getElementById('results').style.display='block';
+}
+
+function esc(s){return(s||'').replace(/['"]/g,'');}
+
+// ─── TOGGLER "FAIT" ────────────────────────────────────────────────────────────
+const lastToggleAt={};
+document.getElementById('tournees-list').addEventListener('click',function(e){
+  // Bouton Démarrer
+  const startBtn=e.target.closest('[data-tourkey]');
+  if(startBtn&&startBtn.classList.contains('tournee-start-btn')){
+    const tk=startBtn.dataset.tourkey;
+    tourStarted[tk]=Date.now();
+    localStorage.setItem('soa_tour_started',JSON.stringify(tourStarted));
+    if(currentRouteData)renderResults(currentRouteData,true);
+    return;
+  }
+  // Bouton Fait
+  const row=e.target.closest('.liv-row');
+  if(!row)return;
+  if(e.target.closest('a')||e.target.closest('.methode-badge'))return;
+  const key=row.dataset.key;if(!key)return;
+  const now=Date.now();if(lastToggleAt[key]&&now-lastToggleAt[key]<350)return;
+  lastToggleAt[key]=now;
+  const btn=row.querySelector('.fait-btn');if(btn){btn.classList.add('pulse');setTimeout(()=>btn.classList.remove('pulse'),250);}
+  toggleDel(key,parseInt(row.dataset.total,10),parseInt(row.dataset.allstops,10));
+});
+
+function toggleDel(key,totalStops,allStops){
+  deliveryStates[key]=!deliveryStates[key];saveDS(deliveryStates);
+  const done=Object.values(deliveryStates).filter(v=>v).length;
+  document.getElementById('s-done').textContent=done+'/'+allStops;
+  updateProgress(done,allStops);
+  pushProgress(done,allStops);
+  // Mise à jour directe de la ligne sans re-render complet
+  const row=document.querySelector(`.liv-row[data-key="${cssEscape(key)}"]`);
+  if(row){
+    const isDone=deliveryStates[key];
+    row.classList.toggle('done',isDone);
+    const numEl=row.querySelector('.liv-num');
+    if(numEl){
+      const isReprise=numEl.textContent==='↩'||numEl.dataset.color==='#D97706';
+      numEl.textContent=isDone?'✓':isReprise?'↩':numEl.dataset.ordre;
+      numEl.style.background=isDone?'#16A34A':numEl.dataset.color;
+    }
+    const clientEl=row.querySelector('.liv-client');if(clientEl)clientEl.classList.toggle('done',isDone);
+    const btnEl=row.querySelector('.fait-btn');if(btnEl){btnEl.textContent=isDone?'↩️ Annuler':'✅ Fait';btnEl.classList.toggle('is-done',isDone);}
+  }
+}
+function updateProgress(done,total){
+  const pct=total?Math.round((done/total)*100):0;
+  const el=document.getElementById('day-progress-fill');if(el)el.style.width=pct+'%';
+}
+
+// ─── DÉNIVELÉ ──────────────────────────────────────────────────────────────────
+// File d'attente globale : un seul appel Open-Elevation à la fois, espacé de 700ms.
+// Avant, chaque tournée tirait sa requête en même temps que les autres — l'API
+// gratuite refusait silencieusement les appels simultanés, laissant certaines
+// tournées (souvent la 2e ou la 3e) sans dénivelé sans aucun message d'erreur.
+let _denivQueue=Promise.resolve();
+function queueDenivele(fn){
+  _denivQueue=_denivQueue.then(()=>new Promise(r=>setTimeout(r,700))).then(fn).catch(()=>{});
+  return _denivQueue;
+}
+async function fetchDeniveleOnce(pts){
+  const r=await fetch('https://api.open-elevation.com/api/v1/lookup',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({locations:pts.map(l=>({latitude:l.lat,longitude:l.lon}))})});
+  if(!r.ok)throw new Error('http '+r.status);
+  const d=await r.json();const elev=(d.results||[]).map(e=>e.elevation);
+  if(elev.length<2)throw new Error('pas assez de points');
+  let gain=0,loss=0;
+  for(let i=1;i<elev.length;i++){const diff=elev[i]-elev[i-1];if(diff>0)gain+=diff;else loss+=Math.abs(diff);}
+  return{gain:Math.round(gain),loss:Math.round(loss),elev};
+}
+// Petit profil d'élévation façon application de randonnée : pleine largeur du
+// téléphone, peu de hauteur, courbe + aplat dégradé pour visualiser montées/descentes
+// d'un coup d'œil sans avoir à lire des chiffres.
+function buildElevSVG(elev,uid){
+  const w=300,h=54,pad=4;
+  const min=Math.min(...elev),max=Math.max(...elev);
+  const range=Math.max(1,max-min);
+  const stepX=elev.length>1?(w-2*pad)/(elev.length-1):0;
+  const pts=elev.map((e,i)=>[pad+i*stepX,pad+(1-(e-min)/range)*(h-2*pad)]);
+  const line=pts.map((p,i)=>(i===0?'M':'L')+p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ');
+  const area=`${line} L${pts[pts.length-1][0].toFixed(1)},${(h-pad).toFixed(1)} L${pts[0][0].toFixed(1)},${(h-pad).toFixed(1)} Z`;
+  return`<svg viewBox="0 0 ${w} ${h}" width="100%" height="52" preserveAspectRatio="none" style="display:block;">
+    <defs><linearGradient id="elevGrad${uid}" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#16A34A" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#16A34A" stop-opacity="0.03"/>
+    </linearGradient></defs>
+    <path d="${area}" fill="url(#elevGrad${uid})" stroke="none"/>
+    <path d="${line}" fill="none" stroke="#16A34A" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  </svg>`;
+}
+// Ajoute des points intermédiaires (interpolation simple) entre deux arrêts, pour que
+// le profil suive davantage la forme réelle du trajet plutôt que de sauter sèchement
+// d'un client au suivant — la route ne va jamais en ligne droite parfaite.
+function interpolatePoints(lat1,lon1,lat2,lon2,n){
+  const pts=[];
+  for(let i=1;i<=n;i++){const f=i/(n+1);pts.push({lat:lat1+(lat2-lat1)*f,lon:lon1+(lon2-lon1)*f});}
+  return pts;
+}
+async function fetchDenivele(t,ti){
+  // Le dépôt de départ sert de point de départ au profil — indispensable pour les
+  // tournées à un seul client (sinon impossible de calculer une différence d'altitude
+  // avec un seul point), et plus juste de toute façon : le dénivelé d'une tournée
+  // commence quand le camion quitte le dépôt, pas seulement entre les clients.
+  const depotName=t.site_chargement||currentRouteData?.depot_depart||'Pomarez';
+  const depotGPS=resolveDepot(depotName);
+  const stops=[...(depotGPS?[{lat:depotGPS.lat,lon:depotGPS.lon}]:[]),...t.livraisons.filter(l=>l.lat&&l.lon)];
+  const el=document.getElementById('deniv-t'+ti);
+  if(stops.length<2){
+    // Diagnostic LIVE : on inspecte directement les livraisons réelles de CETTE
+    // tournée à cet instant précis, plutôt que de se fier à un état global qui peut
+    // être périmé (rendu précédent, course entre deux rendus). Donne la vérité brute,
+    // exploitable directement par capture d'écran.
+    const detailParts=t.livraisons.map(l=>{
+      const hasCoord=!!(l.lat&&l.lon);
+      const hasAddr=!!(l.adresse&&l.ville);
+      return`${(l.client||'?').slice(0,18)}[${l.silo_client||'-'}]:${hasCoord?'GPS':hasAddr?'adr.':'rien'}`;
+    });
+    if(el)el.innerHTML=`<div style="font-size:11px;font-weight:700;color:var(--muted);padding:6px 16px;cursor:pointer;" onclick="retryGeocodeTournee(${ti})">⛰️ Dénivelé indisponible (dépôt ${depotGPS?'localisé':'NON localisé : '+depotName} + ${stops.length-(depotGPS?1:0)}/${t.livraisons.length} client(s)) — ${detailParts.join(' · ')} · toucher pour réessayer</div>`;
+    return;
+  }
+  // Construit une trajectoire plus dense : chaque arrêt, plus 4 points interpolés
+  // jusqu'au suivant — donne une courbe beaucoup plus lisse et détaillée qu'un simple
+  // point par client, dans la limite de 60 points pour rester raisonnable côté API.
+  const INTERP=4;
+  let pts=[];
+  for(let i=0;i<stops.length;i++){
+    pts.push(stops[i]);
+    if(i<stops.length-1)pts.push(...interpolatePoints(stops[i].lat,stops[i].lon,stops[i+1].lat,stops[i+1].lon,INTERP));
+  }
+  if(pts.length>60)pts=pts.slice(0,60);
+  if(el)el.innerHTML=`<div style="font-size:11px;font-weight:700;color:var(--muted);padding:6px 16px;">⛰️ calcul du dénivelé…</div>`;
+  queueDenivele(async()=>{
+    let res=null;
+    for(let attempt=0;attempt<2&&!res;attempt++){
+      try{res=await fetchDeniveleOnce(pts);}
+      catch{if(attempt===0)await new Promise(r=>setTimeout(r,1200));}
+    }
+    const el2=document.getElementById('deniv-t'+ti);
+    if(!el2)return;
+    if(res)el2.innerHTML=`<div style="padding:6px 14px 2px;">${buildElevSVG(res.elev,ti)}</div><div style="font-size:11px;font-weight:800;color:var(--muted);padding:0 16px 8px;text-align:center;">⛰️ +${res.gain}m / -${res.loss}m</div>`;
+    else el2.innerHTML=`<div style="font-size:11px;font-weight:700;color:var(--muted);padding:6px 16px;cursor:pointer;" onclick="fetchDenivele(currentRouteData.tournees[${ti}],${ti})">⛰️ Dénivelé indisponible · toucher pour réessayer</div>`;
+  });
+}
+async function retryGeocodeTournee(ti){
+  const t=currentRouteData?.tournees?.[ti];if(!t)return;
+  const el=document.getElementById('deniv-t'+ti);
+  if(el)el.innerHTML=`<div style="font-size:11px;font-weight:700;color:var(--muted);padding:6px 16px;">⛰️ Localisation en cours…</div>`;
+  await enrichCoordinates([t]);
+  saveRoute(currentRouteData);
+  fetchDenivele(t,ti);
+}
+
+// ─── OPTIMISATION ──────────────────────────────────────────────────────────────
+function optimizeRoute(ti){
+  if(!currentRouteData)return;const t=currentRouteData.tournees[ti];
+  if(!t||t.livraisons.length<3){alert('Pas assez de points pour optimiser.');return;}
+  const withGPS=t.livraisons.filter(l=>l.lat&&l.lon);
+  const withoutGPS=t.livraisons.filter(l=>!l.lat||!l.lon);
+  const depot=resolveDepot(t.site_chargement||currentRouteData.depot_depart||'Pomarez')||{lat:withGPS[0]?.lat||43.6,lon:withGPS[0]?.lon||-0.8};
+  const ordered=[];const remaining=[...withGPS];let cur={lat:depot.lat,lon:depot.lon};
+  while(remaining.length){
+    let best=null,bestDist=Infinity,bestIdx=0;
+    remaining.forEach((l,i)=>{const d=(l.lat-cur.lat)**2+(l.lon-cur.lon)**2;if(d<bestDist){bestDist=d;best=l;bestIdx=i;}});
+    if(best){ordered.push(best);remaining.splice(bestIdx,1);cur={lat:best.lat,lon:best.lon};}else break;
+  }
+  if(!confirm(`Réorganiser les ${t.livraisons.length} arrêts pour réduire le trajet ?`))return;
+  currentRouteData.tournees[ti].livraisons=[...ordered,...withoutGPS].map((l,i)=>({...l,ordre:i+1}));
+  saveRoute(currentRouteData);renderResults(currentRouteData,true);
+}
+
+// ─── CARBURANT ─────────────────────────────────────────────────────────────────
+async function loadFuel(){
+  const div=document.getElementById('fuel-list');
+  document.getElementById('fuel-loading').style.display='block';div.innerHTML='';
+  let cities=[];
+  // Points GPS uniques de la tournée — utilisés pour chercher les stations DKV à proximité
+  // (le service public prix-carburants.gouv.fr ne connaît pas le réseau DKV).
+  let waypoints=[];
+  if(currentRouteData?.tournees){
+    currentRouteData.tournees.forEach(t=>t.livraisons.forEach(l=>{
+      if(!cities.find(c=>c.cp===l.cp))cities.push({ville:l.ville,cp:l.cp});
+      if(l.lat&&l.lon&&!waypoints.find(w=>w.ville===l.ville))waypoints.push({ville:l.ville,lat:l.lat,lon:l.lon});
+    }));
+    document.getElementById('fuel-subtitle').textContent=`Stations sur votre itinéraire (${cities.length} villes)`;
+  }
+  try{
+    const[resp,dkv]=await Promise.all([
+      fetch('/api/fuel',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({cities})}),
+      loadDKV()
+    ]);
+    const data=await resp.json();document.getElementById('fuel-loading').style.display='none';
+    let html='';
+    // Réseau DKV (pas de prix en temps réel dans ces données — uniquement la localisation)
+    if(dkv.length&&waypoints.length){
+      const nearStations=[];
+      waypoints.slice(0,8).forEach(w=>{
+        nearestDKV(w.lat,w.lon,3).forEach(s=>{if(!nearStations.find(x=>x.lat===s.lat&&x.lon===s.lon))nearStations.push({...s,near_city:w.ville});});
+      });
+      if(nearStations.length){
+        html+=`<span class="section-label" style="margin-top:0;">⛽ Réseau DKV (carte pro)</span>
+        <div class="card"><div style="padding:0 16px;">
+          ${nearStations.slice(0,12).map(s=>{const mu=`https://www.google.com/maps?q=${s.lat},${s.lon}`;
+            return`<div class="fuel-row"><div style="flex:1;"><div class="fuel-name">${s.brand} · ${s.near_city}</div><div class="fuel-addr">${s.addr} (${s.cp})</div><a href="${mu}" target="_blank" style="font-size:12px;font-weight:700;color:var(--blue);">📍 Y aller</a></div></div>`;}).join('')}
+        </div></div>`;
+      }
+    }
+    if(!data.results?.length&&!html){div.innerHTML='<div class="card"><div style="padding:14px 16px;color:var(--muted);text-align:center;font-size:14px;font-weight:600;">Aucune station trouvée</div></div>';return;}
+    if(data.results?.length){
+      const byCity={};data.results.forEach(r=>{const c=r.near_city||r.ville||'Région';if(!byCity[c])byCity[c]=[];byCity[c].push(r);});
+      html+=Object.entries(byCity).map(([city,stations])=>`
+        <span class="section-label" style="margin-top:8px;">📍 Près de ${city} (prix publics)</span>
+        <div class="card"><div style="padding:0 16px;">
+          ${stations.map(s=>{const prix=s.gazole_prix?parseFloat(s.gazole_prix).toFixed(3)+'€/L':'N/A';const mu=s.geom?`https://www.google.com/maps?q=${s.geom.lat},${s.geom.lon}`:'';
+            return`<div class="fuel-row"><div style="flex:1;"><div class="fuel-name">${s.nom||'Station'}</div><div class="fuel-addr">${s.adresse||''}</div>${mu?`<a href="${mu}" target="_blank" style="font-size:12px;font-weight:700;color:var(--blue);">📍 Y aller</a>`:''}</div><div class="fuel-price">${prix}</div></div>`;}).join('')}
+        </div></div>`).join('');
+    }
+    div.innerHTML=html;
+  }catch(e){document.getElementById('fuel-loading').style.display='none';div.innerHTML=`<div class="err-box">⚠️ ${e.message}</div>`;}
+}
+
+// ─── RÉSEAU DKV ────────────────────────────────────────────────────────────────
+let dkvDB=null;
+async function loadDKV(){
+  if(dkvDB)return dkvDB;
+  try{const r=await fetch('/dkv_stations.json');dkvDB=await r.json();}catch{dkvDB=[];}
+  return dkvDB;
+}
+// Stations DKV les plus proches d'un point GPS, dans un rayon de 15 km.
+function nearestDKV(lat,lon,n){
+  if(!dkvDB?.length)return[];
+  const R=6371;
+  return dkvDB.map(s=>{
+    const dLat=(s.lat-lat)*Math.PI/180,dLon=(s.lon-lon)*Math.PI/180;
+    const a=Math.sin(dLat/2)**2+Math.cos(lat*Math.PI/180)*Math.cos(s.lat*Math.PI/180)*Math.sin(dLon/2)**2;
+    const dist=R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+    return{...s,dist};
+  }).filter(s=>s.dist<=15).sort((a,b)=>a.dist-b.dist).slice(0,n);
+}
+
+// ─── POINTS DE REPOS ───────────────────────────────────────────────────────────
+async function loadRestPoints(){
+  const v=await kvGet('restpoints');
+  if(v){try{const p=JSON.parse(v);localStorage.setItem('soa_rest',v);return p;}catch{}}
+  try{return JSON.parse(localStorage.getItem('soa_rest')||'[]');}catch{return[];}
+}
+async function saveRestPts(p){const v=JSON.stringify(p);localStorage.setItem('soa_rest',v);await kvSet('restpoints',v);}
+function showAddRestForm(){const f=document.getElementById('add-rest-form');f.style.display=f.style.display==='none'?'block':'none';}
+async function addRestByGPS(){
+  if(!myLat||!myLon){alert('GPS non disponible. Allez d\'abord dans Flotte pour activer le GPS.');return;}
+  const name=prompt('Nom du lieu ?');if(!name)return;
+  const p=await loadRestPoints();
+  p.unshift({id:Date.now(),name,type:'parking',comment:'',lat:myLat,lon:myLon,addedBy:sel||'?',date:new Date().toLocaleDateString('fr')});
+  await saveRestPts(p);renderRestPoints();
+}
+async function saveRestPoint(){
+  const name=document.getElementById('rest-name').value.trim();if(!name)return;
+  const p=await loadRestPoints();
+  p.unshift({id:Date.now(),name,type:document.getElementById('rest-type').value,comment:document.getElementById('rest-comment').value.trim(),lat:myLat,lon:myLon,addedBy:sel||'?',date:new Date().toLocaleDateString('fr')});
+  await saveRestPts(p);
+  document.getElementById('rest-name').value='';document.getElementById('rest-comment').value='';document.getElementById('add-rest-form').style.display='none';
+  renderRestPoints();
+}
+async function renderRestPoints(){
+  const div=document.getElementById('rest-list');
+  div.innerHTML='<div class="card"><div style="text-align:center;padding:20px;"><div class="spinner" style="margin:0 auto 8px;"></div></div></div>';
+  const pts=await loadRestPoints();
+  if(!pts.length){div.innerHTML='<div class="card"><div style="color:var(--muted);text-align:center;font-size:14px;font-weight:600;padding:20px;">Aucun point de repos.<br>Soyez le premier à en ajouter !</div></div>';return;}
+  const icons={parking:'🅿️',aire:'🛣️',restaurant:'🍽️',station:'⛽',autre:'📍'};
+  div.innerHTML='<div class="card"><div style="padding:0 16px;">'+pts.map(p=>`<div class="rest-row"><span class="rest-type">${icons[p.type]||'📍'} ${p.type}</span><div class="rest-name">${p.name}</div>${p.comment?`<div class="rest-comment">${p.comment}</div>`:''} ${p.lat&&p.lon?`<a href="https://www.google.com/maps/dir/?api=1&destination=${p.lat},${p.lon}&travelmode=driving" target="_blank" style="font-size:13px;font-weight:800;color:var(--blue);display:inline-block;margin-top:5px;">🗺️ Y aller</a>`:''}<div style="font-size:11px;color:var(--muted);font-weight:600;margin-top:3px;">Ajouté par ${p.addedBy} · ${p.date}</div></div>`).join('')+'</div></div>';
+}
+
+// ─── PROFIL ────────────────────────────────────────────────────────────────────
+function saveStats(km,litres,tournees,livraisons){if(!sel)return;const k='soa_stats_'+sel;let s=[];try{s=JSON.parse(localStorage.getItem(k)||'[]');}catch{}s.push({date:new Date().toLocaleDateString('fr'),km,litres,tournees,livraisons,truck:currentTruck});if(s.length>100)s=s.slice(-100);localStorage.setItem(k,JSON.stringify(s));}
+function renderProfile(){
+  if(!sel){document.getElementById('profile-name').textContent='Sélectionnez un conducteur';return;}
+  const d=drivers.find(x=>x.display===sel||x.name===sel)||{color:'#0F172A'};
+  document.getElementById('profile-header').style.background=`linear-gradient(135deg,${d.color},#1E3A5F)`;
+  document.getElementById('profile-name').textContent=sel;
+  document.getElementById('profile-truck').textContent=`Dernier camion : ${localStorage.getItem('soa_truck_'+sel)||'–'}`;
+  document.getElementById('profile-conso-ref').textContent=`Référence : ${DRIVER_CONSO[selFull]||DRIVER_CONSO[sel]||38} L/100km`;
+  const stats=JSON.parse(localStorage.getItem('soa_stats_'+sel)||'[]');
+  document.getElementById('stat-km').textContent=stats.reduce((a,s)=>a+s.km,0);
+  document.getElementById('stat-conso').textContent=stats.reduce((a,s)=>a+s.litres,0);
+  document.getElementById('stat-tournees').textContent=stats.reduce((a,s)=>a+s.tournees,0);
+  document.getElementById('stat-livraisons').textContent=stats.reduce((a,s)=>a+(s.livraisons||0),0);
+  const sorted=Object.entries(DRIVER_CONSO).sort((a,b)=>a[1]-b[1]);
+  document.getElementById('team-conso').innerHTML=sorted.map(([name,c])=>{
+    const dr=drivers.find(x=>x.fullname===name||x.name===name);const color=dr?.color||'#64748B';const pct=Math.round((c-30)/(50-30)*100);
+    const isMe=name===selFull||name===sel;
+    return`<div class="conso-bar"><div class="conso-bar-label"><span style="color:${isMe?color:'var(--text)'};font-weight:${isMe?900:600}">${dr?dr.display:cap(name.split(' ')[0])}</span><span style="color:${color};font-weight:800;">${c} L/100</span></div><div class="conso-bar-track"><div class="conso-bar-fill" style="width:${pct}%;background:${color};"></div></div></div>`;
+  }).join('');
+}
+
+// ─── RÉGLAGES ──────────────────────────────────────────────────────────────────
+function renderSettingsDrivers(){
+  document.getElementById('settings-drivers').innerHTML=drivers.map(d=>`
+    <div class="driver-mgmt-row">
+      <div class="cdot" style="--c:${d.color}"></div>
+      <span style="flex:1;font-size:15px;font-weight:700;">${d.display||d.name}</span>
+      <button class="remove-btn" onclick="removeDriver('${(d.display||d.name).replace(/'/g,'\\&apos;')}')">🗑</button>
+    </div>`).join('');
+}
+function removeDriver(display){
+  drivers=drivers.filter(d=>d.display!==display&&d.name!==display);
+  if(sel===display)sel=null;
+  saveDrivers();renderDrivers();renderSettingsDrivers();
+}
+function addDriver(){
+  const inp=document.getElementById('new-driver-inp');const raw=inp.value.trim();if(!raw)return;
+  const parts=raw.split(' ');const firstName=cap(parts[0]);const initial=(parts[1]||'').charAt(0).toUpperCase();
+  const display=firstName+(initial?' '+initial:'');
+  const fullname=raw.toUpperCase();
+  if(drivers.find(d=>d.display===display))return;
+  drivers.push({display,fullname,phone:'',color:DC[drivers.length%DC.length]});
+  saveDrivers();renderDrivers();renderSettingsDrivers();inp.value='';
+}
+
+// ─── UTILITAIRES ───────────────────────────────────────────────────────────────
+function showLoading(v){document.getElementById('loading').style.display=v?'block':'none';if(v&&sel)document.getElementById('loading-sub').textContent=`Lecture du bon de ${sel}…`;}
+function showErr(m){const e=document.getElementById('err-box');if(m){e.textContent='⚠️ '+m;e.style.display='block';}else e.style.display='none';}
+function resetRoute(){
+  localStorage.removeItem('soa_route');localStorage.removeItem('soa_ds');localStorage.removeItem('soa_tour_started');
+  deliveryStates={};tourStarted={};currentRouteData=null;
+  document.getElementById('results').style.display='none';
+  const td=document.getElementById('truck-detected');if(td)td.style.display='none';
+  const cb=document.getElementById('conso-box');if(cb)cb.style.display='none';
+  const pa=document.getElementById('pause-alert');if(pa)pa.style.display='none';
+  showErr('');
+}
+
+// ─── INIT ──────────────────────────────────────────────────────────────────────
+renderDrivers();
+loadSilos();
+loadManagerPhone();
+Notification.requestPermission&&Notification.requestPermission();
+startGPS();
+restoreDepotState();
+
+// Auto-restore conducteur
+(function(){
+  try{const n=localStorage.getItem('soa_selected_driver');if(n&&drivers.find(d=>d.display===n||d.name===n))selectDriver(n,true);}catch{}
+})();
+</script>
+</body>
+</html>
