@@ -821,7 +821,35 @@ function geoKey(adresse,cp,ville){return normName(`${adresse}|${cp}|${ville}`);}
 // téléphone : rien à localiser ? erreur réseau/serveur ? adresses non trouvées ?
 window._lastGeoDebug=null;
 
+// Quand un même client a plusieurs silos, le bon ne répète pas toujours l'adresse sur
+// chaque ligne — sans ça, les silos suivants n'ont rien à localiser. On reporte
+// l'adresse connue d'un silo du client sur ses autres silos de la même tournée.
+// (Même logique que côté serveur — appliquée ici aussi pour que les tournées déjà
+// enregistrées avant cette correction se réparent automatiquement, sans recharger le PDF.)
+function backfillClientAddresses(tournees){
+  for(const t of tournees){
+    const byClient={};
+    for(const l of t.livraisons){
+      const k=normName(l.client);
+      if(!k)continue;
+      if(!byClient[k])byClient[k]=[];
+      byClient[k].push(l);
+    }
+    for(const group of Object.values(byClient)){
+      if(group.length<2)continue;
+      const ref=group.find(l=>l.adresse&&l.ville);
+      if(!ref)continue;
+      for(const l of group){
+        if(!l.adresse)l.adresse=ref.adresse;
+        if(!l.cp)l.cp=ref.cp;
+        if(!l.ville)l.ville=ref.ville;
+      }
+    }
+  }
+}
+
 async function enrichCoordinates(tournees){
+  backfillClientAddresses(tournees);
   const toGeocode=[]; // {key, item, q, cp}
   let totalLivraisons=0,confirmedSilo=0,alreadyHadCoords=0,noAddress=0;
   for(const t of tournees){
@@ -1160,7 +1188,27 @@ async function fetchDeniveleOnce(pts){
   if(elev.length<2)throw new Error('pas assez de points');
   let gain=0,loss=0;
   for(let i=1;i<elev.length;i++){const diff=elev[i]-elev[i-1];if(diff>0)gain+=diff;else loss+=Math.abs(diff);}
-  return{gain:Math.round(gain),loss:Math.round(loss)};
+  return{gain:Math.round(gain),loss:Math.round(loss),elev};
+}
+// Petit profil d'élévation façon application de randonnée : pleine largeur du
+// téléphone, peu de hauteur, courbe + aplat dégradé pour visualiser montées/descentes
+// d'un coup d'œil sans avoir à lire des chiffres.
+function buildElevSVG(elev,uid){
+  const w=300,h=54,pad=4;
+  const min=Math.min(...elev),max=Math.max(...elev);
+  const range=Math.max(1,max-min);
+  const stepX=elev.length>1?(w-2*pad)/(elev.length-1):0;
+  const pts=elev.map((e,i)=>[pad+i*stepX,pad+(1-(e-min)/range)*(h-2*pad)]);
+  const line=pts.map((p,i)=>(i===0?'M':'L')+p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ');
+  const area=`${line} L${pts[pts.length-1][0].toFixed(1)},${(h-pad).toFixed(1)} L${pts[0][0].toFixed(1)},${(h-pad).toFixed(1)} Z`;
+  return`<svg viewBox="0 0 ${w} ${h}" width="100%" height="52" preserveAspectRatio="none" style="display:block;">
+    <defs><linearGradient id="elevGrad${uid}" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#16A34A" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#16A34A" stop-opacity="0.03"/>
+    </linearGradient></defs>
+    <path d="${area}" fill="url(#elevGrad${uid})" stroke="none"/>
+    <path d="${line}" fill="none" stroke="#16A34A" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  </svg>`;
 }
 async function fetchDenivele(t,ti){
   const pts=t.livraisons.filter(l=>l.lat&&l.lon).slice(0,10);
@@ -1188,7 +1236,7 @@ async function fetchDenivele(t,ti){
     }
     const el2=document.getElementById('deniv-t'+ti);
     if(!el2)return;
-    if(res)el2.innerHTML=`<div style="font-size:11px;font-weight:800;color:var(--muted);padding:6px 16px;">⛰️ +${res.gain}m / -${res.loss}m</div>`;
+    if(res)el2.innerHTML=`<div style="padding:6px 14px 2px;">${buildElevSVG(res.elev,ti)}</div><div style="font-size:11px;font-weight:800;color:var(--muted);padding:0 16px 8px;text-align:center;">⛰️ +${res.gain}m / -${res.loss}m</div>`;
     else el2.innerHTML=`<div style="font-size:11px;font-weight:700;color:var(--muted);padding:6px 16px;cursor:pointer;" onclick="fetchDenivele(currentRouteData.tournees[${ti}],${ti})">⛰️ Dénivelé indisponible · toucher pour réessayer</div>`;
   });
 }
