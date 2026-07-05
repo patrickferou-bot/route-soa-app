@@ -1,0 +1,9 @@
+{
+  "functions": {
+    "api/analyze.js": { "memory": 1024, "maxDuration": 30 },
+    "api/fuel.js":    { "memory": 512,  "maxDuration": 15 },
+    "api/kv.js":      { "memory": 256,  "maxDuration": 10 },
+    "api/geocode.js": { "memory": 512,  "maxDuration": 20 },
+    "api/radars.js":  { "memory": 256,  "maxDuration": 15 }
+  }
+}
