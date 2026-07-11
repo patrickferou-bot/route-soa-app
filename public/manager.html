@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LOGICIA — Vue Manager</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{font-family:'Inter',Arial,sans-serif;background:#F0F4F8;color:#1A202C;min-height:100vh;}
+header{background:#0F172A;padding:16px 18px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:10;}
+.header-title{color:#fff;font-size:17px;font-weight:900;}
+.header-sub{color:#94A3B8;font-size:11px;font-weight:700;}
+.refresh-btn{margin-left:auto;background:rgba(255,255,255,0.12);border:none;color:#fff;border-radius:10px;padding:8px 12px;font-size:14px;cursor:pointer;font-family:inherit;font-weight:700;}
+
+/* PIN SCREEN */
+.pin-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:80vh;padding:20px;}
+.pin-title{font-size:20px;font-weight:900;margin-bottom:6px;}
+.pin-sub{font-size:13px;color:#64748B;margin-bottom:24px;text-align:center;}
+.pin-input{width:200px;text-align:center;font-size:28px;font-weight:900;letter-spacing:12px;padding:16px;border:3px solid #E2E8F0;border-radius:14px;outline:none;font-family:inherit;}
+.pin-input:focus{border-color:#FF6B00;}
+.pin-btn{margin-top:16px;background:#FF6B00;color:#fff;border:none;border-radius:14px;padding:14px 40px;font-size:16px;font-weight:900;cursor:pointer;font-family:inherit;}
+.pin-error{color:#DC2626;font-size:13px;font-weight:700;margin-top:10px;display:none;}
+
+/* DASHBOARD */
+.content{padding:16px;max-width:600px;margin:0 auto;display:none;}
+.summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
+.summary-card{background:#fff;border-radius:14px;padding:14px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.06);}
+.summary-val{font-size:24px;font-weight:900;color:#FF6B00;}
+.summary-label{font-size:11px;font-weight:700;color:#64748B;text-transform:uppercase;margin-top:2px;}
+
+.section-label{font-size:12px;font-weight:800;color:#64748B;text-transform:uppercase;letter-spacing:0.06em;margin:18px 0 8px;display:block;}
+
+.driver-card{background:#fff;border-radius:14px;padding:14px 16px;margin-bottom:10px;box-shadow:0 2px 8px rgba(0,0,0,0.06);border-left:5px solid var(--c,#94A3B8);}
+.driver-top{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.driver-avatar{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:900;color:#fff;flex-shrink:0;}
+.driver-name{font-size:15px;font-weight:800;}
+.driver-meta{font-size:11px;color:#64748B;font-weight:600;}
+.status-pill{padding:4px 10px;border-radius:14px;font-size:11px;font-weight:800;margin-left:auto;white-space:nowrap;}
+.st-route{background:#DCFCE7;color:#166534;}
+.st-waiting{background:#FEF3C7;color:#92400E;}
+.st-loading{background:#DBEAFE;color:#1E3A8A;}
+.st-unknown{background:#F1F5F9;color:#64748B;}
+
+.progress-wrap{background:#E2E8F0;border-radius:20px;height:10px;overflow:hidden;margin:6px 0 4px;}
+.progress-fill{height:100%;border-radius:20px;background:linear-gradient(90deg,#2563EB,#16A34A);}
+.progress-text{font-size:12px;font-weight:700;color:#334155;}
+
+.driver-extra{display:flex;gap:14px;margin-top:8px;padding-top:8px;border-top:1px solid #F1F5F9;font-size:11px;color:#64748B;font-weight:700;flex-wrap:wrap;}
+.epa-badge{font-weight:900;}
+
+.disclaimer{font-size:11px;color:#94A3B8;font-weight:600;text-align:center;margin:20px 0 10px;line-height:1.5;}
+.spinner{width:30px;height:30px;border:4px solid rgba(255,107,0,0.2);border-top-color:#FF6B00;border-radius:50%;animation:spin .8s linear infinite;margin:40px auto;}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="header-title">LOGICIA</div>
+    <div class="header-sub">Vue Manager · Sud Ouest Aliment</div>
+  </div>
+  <button class="refresh-btn" id="refresh-btn" style="display:none;" onclick="loadDashboard()">↻ Actualiser</button>
+</header>
+
+<div class="pin-screen" id="pin-screen">
+  <div class="pin-title">Accès manager</div>
+  <div class="pin-sub">Entrez le code à 4 chiffres pour voir<br>l'état de la flotte en temps réel.</div>
+  <input class="pin-input" id="pin-input" type="tel" inputmode="numeric" maxlength="4" autofocus>
+  <button class="pin-btn" onclick="checkPin()">Voir la flotte</button>
+  <div class="pin-error" id="pin-error">Code incorrect — réessayez.</div>
+</div>
+
+<div class="content" id="content">
+  <div id="dash-body"><div class="spinner"></div></div>
+</div>
+
+<script>
+let currentPin='';
+
+document.getElementById('pin-input').addEventListener('keydown', e=>{
+  if(e.key==='Enter')checkPin();
+});
+
+async function checkPin(){
+  const pin=document.getElementById('pin-input').value.trim();
+  if(pin.length!==4)return;
+  document.getElementById('dash-body').innerHTML='<div class="spinner"></div>';
+  try{
+    const r=await fetch('/api/manager?pin='+encodeURIComponent(pin));
+    if(!r.ok){
+      document.getElementById('pin-error').style.display='block';
+      return;
+    }
+    currentPin=pin;
+    document.getElementById('pin-screen').style.display='none';
+    document.getElementById('content').style.display='block';
+    document.getElementById('refresh-btn').style.display='block';
+    const data=await r.json();
+    renderDashboard(data);
+    // Rafraîchissement automatique toutes les 60 secondes pour rester "temps réel"
+    setInterval(loadDashboard,60000);
+  }catch(e){
+    document.getElementById('pin-error').textContent='Erreur de connexion.';
+    document.getElementById('pin-error').style.display='block';
+  }
+}
+
+async function loadDashboard(){
+  if(!currentPin)return;
+  try{
+    const r=await fetch('/api/manager?pin='+encodeURIComponent(currentPin));
+    if(!r.ok)return;
+    const data=await r.json();
+    renderDashboard(data);
+  }catch{}
+}
+
+function statusInfo(status){
+  if(status==='ROUTE')return{cls:'st-route',label:'🛣️ En route'};
+  if(status==='WAITING')return{cls:'st-waiting',label:'🟡 Attente dépôt'};
+  if(status==='LOADING')return{cls:'st-loading',label:'🟠 Chargement'};
+  return{cls:'st-unknown',label:'❓ Inconnu'};
+}
+
+function renderDashboard(data){
+  const s=data.summary;
+  const drivers=[...data.drivers].sort((a,b)=>{
+    // Actifs aujourd'hui d'abord, puis par nombre d'arrêts restants décroissant
+    const aActive=a.today?1:0,bActive=b.today?1:0;
+    if(aActive!==bActive)return bActive-aActive;
+    if(a.today&&b.today)return b.today.remaining-a.today.remaining;
+    return 0;
+  });
+
+  const summaryHtml=`
+    <div class="summary-grid">
+      <div class="summary-card"><div class="summary-val">${s.drivers_active_today}</div><div class="summary-label">Chauffeurs actifs</div></div>
+      <div class="summary-card"><div class="summary-val" style="color:#16A34A;">${s.deliveries_done}</div><div class="summary-label">Livraisons faites</div></div>
+      <div class="summary-card"><div class="summary-val" style="color:#D97706;">${s.deliveries_remaining}</div><div class="summary-label">Restantes</div></div>
+      <div class="summary-card"><div class="summary-val" style="color:#2563EB;">${s.avg_epa!=null?s.avg_epa.toFixed(1):'–'}</div><div class="summary-label">Score EPA moyen</div></div>
+    </div>
+    <div class="section-label">📋 ${s.date}</div>`;
+
+  const driversHtml=drivers.map(d=>{
+    const st=statusInfo(d.status);
+    const pct=d.today?Math.round((d.today.done/d.today.total)*100):0;
+    const progHtml=d.today?`
+      <div class="progress-wrap"><div class="progress-fill" style="width:${pct}%"></div></div>
+      <div class="progress-text">${d.today.done}/${d.today.total} livrées · <b>${d.today.remaining} restante${d.today.remaining>1?'s':''}</b></div>
+    `:`<div style="font-size:12px;color:#94A3B8;font-weight:600;margin-top:4px;">Aucune tournée chargée aujourd'hui</div>`;
+
+    const consoNote=(d.conso_ref)?`Réf. conso ${d.conso_ref.toFixed(1)} L/100km`:'';
+    const epaNote=d.epa?`<span class="epa-badge" style="color:${d.epa.score>=8?'#16A34A':d.epa.score>=6?'#D97706':'#DC2626'};">EPA ${d.epa.score.toFixed(1)}/10</span> (${d.epa.month})`:'EPA non disponible';
+    const updateNote=d.last_update_min_ago!=null?`MAJ il y a ${d.last_update_min_ago} min`:'Aucune donnée position';
+
+    return`<div class="driver-card" style="--c:${d.color};">
+      <div class="driver-top">
+        <div class="driver-avatar" style="background:${d.color};">${d.display.charAt(0)}</div>
+        <div>
+          <div class="driver-name">${d.display}</div>
+          <div class="driver-meta">${d.truck||'Camion inconnu'} · ${d.depot||'Position inconnue'}</div>
+        </div>
+        <span class="status-pill ${st.cls}">${st.label}</span>
+      </div>
+      ${progHtml}
+      <div class="driver-extra">
+        <span>${updateNote}</span>
+        <span>${epaNote}</span>
+        ${consoNote?`<span>${consoNote}</span>`:''}
+      </div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('dash-body').innerHTML=summaryHtml+driversHtml+
+    `<div class="disclaimer">Score EPA et références conso : indicateurs d'efficacité indicatifs, pas un calcul de rentabilité comptable (l'app n'a pas accès aux données financières). Actualisation automatique toutes les 60 secondes.</div>`;
+}
+</script>
+</body>
+</html>
