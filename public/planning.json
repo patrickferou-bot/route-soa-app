@@ -1,0 +1,31 @@
+{
+  "week_label": "Semaine 29",
+  "days": ["Lundi 13/07", "Mardi 14/07", "Mercredi 15/07", "Jeudi 16/07", "Vendredi 17/07"],
+  "dates": ["2026-07-13", "2026-07-14", "2026-07-15", "2026-07-16", "2026-07-17"],
+  "drivers": {
+    "CLAISSE JOSE": ["a", "0", "a", "a", "a"],
+    "DEGERT ISABELLE": ["33", "0", "33", "33", "33"],
+    "DUFOURG THIERRY": ["59", "0", "59", "59", "59"],
+    "FEROU PATRICK": ["a", "0", "chargement", "chargement", "chargement"],
+    "GARESTE CHRISTOPHE": ["61", "0", "61", "61", "61"],
+    "GAYAN SEBASTIEN": ["proxi", "0", "proxi", "proxi", "proxi"],
+    "GRUEL PIERRE": ["58", "0", "53", "53", "53"],
+    "LAGUILHON PHILIPPE": ["a", "0", "a", "a", "a"],
+    "MAUVY MICHEL": ["46", "0", "46", "46", "46"],
+    "MONCAUT SONIA": ["52", "0", "52", "52", "52"],
+    "OGNJANOVIC CYRIL": ["94", "0", "94", "94", "repos"],
+    "RAMAT JULIEN": ["53", "0", "58", "58", "94"],
+    "RICAU CHRISTOPHE": ["1", "0", "1", "1", "1"],
+    "VIEIRA KEVIN": ["a", "0", "0", "0", "58"]
+  },
+  "trucks": {
+    "61": "GR499EC + GJ284GM",
+    "59": "FY752GN + GG576ZE",
+    "46": "FE845HS + ER252YM",
+    "58": "GF385TJ",
+    "94": "FG309GR",
+    "33": "FX075XY",
+    "52": "EF772RB",
+    "53": "GA860NZ"
+  }
+}
